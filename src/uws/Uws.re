@@ -1,0 +1,65 @@
+module Response = Uws_Response;
+module Request = Uws_Request;
+
+type t;
+
+type uwsT;
+
+type appConfigT = {
+  [@bs.as "key_file_name"]
+  keyFileName: option(string),
+  [@bs.as "cert_file_name"]
+  certFileName: option(string),
+  passphrase: option(string),
+  [@bs.as "dh_params_file_name"]
+  dhParamsFileName: option(string),
+  /** This translates to SSL_MODE_RELEASE_BUFFERS */
+  [@bs.as "ssl_prefer_low_memory_usage"]
+  sslPreferLowMemoryUsage: option(bool),
+};
+
+let makeConfig =
+    (
+      ~keyFileName=?,
+      ~certFileName=?,
+      ~passphrase=?,
+      ~dhParamsFileName=?,
+      ~sslPreferLowMemoryUsage=?,
+      (),
+    ) => {
+  let config = {
+    keyFileName,
+    certFileName,
+    passphrase,
+    dhParamsFileName,
+    sslPreferLowMemoryUsage,
+  };
+  config;
+};
+
+[@bs.module] external uws: uwsT = "uWebsockets.js";
+
+[@bs.send.pipe: uwsT] external app: appConfigT => t = "App";
+[@bs.send.pipe: uwsT] external sslApp: appConfigT => t = "SSLApp";
+[@bs.send.pipe: uwsT] external appWithoutConfig: unit => t = "App";
+
+type hostT = string;
+type portT = int;
+type listenCallbackT = unit => unit;
+
+[@bs.send.pipe: t]
+external listenWithHost: (hostT, portT, listenCallbackT) => t = "listen";
+[@bs.send.pipe: t] external listen: (portT, listenCallbackT) => t = "listen";
+
+type pathT = string;
+type handlerT = (Response.t, Request.t) => unit;
+[@bs.send.pipe: t] external get: (pathT, handlerT) => t = "get";
+[@bs.send.pipe: t] external post: (pathT, handlerT) => t = "post";
+[@bs.send.pipe: t] external options: (pathT, handlerT) => t = "options";
+[@bs.send.pipe: t] external del: (pathT, handlerT) => t = "del";
+[@bs.send.pipe: t] external patch: (pathT, handlerT) => t = "patch";
+[@bs.send.pipe: t] external put: (pathT, handlerT) => t = "put";
+[@bs.send.pipe: t] external head: (pathT, handlerT) => t = "head";
+[@bs.send.pipe: t] external connect: (pathT, handlerT) => t = "connect";
+[@bs.send.pipe: t] external trace: (pathT, handlerT) => t = "trace";
+[@bs.send.pipe: t] external any: (pathT, handlerT) => t = "any";

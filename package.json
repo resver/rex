@@ -12,6 +12,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^5.2.1"
+    "bs-platform": "^7.3.2"
+  },
+  "dependencies": {
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v18.0.0"
   }
 }
