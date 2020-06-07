@@ -1,5 +1,5 @@
 {
-  "name": "rex",
+  "name": "@damaera/rex",
   "version": "0.1.0",
   "scripts": {
     "clean": "bsb -clean-world",

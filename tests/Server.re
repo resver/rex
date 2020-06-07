@@ -1,7 +1,10 @@
-open Uws;
+type resDataT = {message: string};
 
-let app = uws |> appWithoutConfig();
+let handler = (App.{route, req, res}) => {
+  switch (route) {
+  | Get([]) => res |> Http.Response.json({message: "hello world"})
+  | _ => res |> Uws_Response.end1("Not found")
+  };
+};
 
-app
-|> any("/*", (res, _) => {res |> Response.end1("hello")})
-|> listen(3030, () => Js.log("hello"));
+App.make(~port=3030, ~handler, ());
