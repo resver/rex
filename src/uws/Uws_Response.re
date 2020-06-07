@@ -25,16 +25,18 @@ type chunkT = string;
 
 // Ends this response by copying the contents of body.
 type bodyT = string;
-[@bs.send.pipe: t] external end_: bodyT => unit = "end";
+[@bs.send.pipe: t] external end0: unit => unit = "end";
+[@bs.send.pipe: t] external end1: bodyT => unit = "end";
+[@bs.send.pipe: t] external endBuffer1: arrayBufferT => unit = "end";
 
 // Ends this response, or tries to,
 // by streaming appropriately sized chunks of body.
 // Use in conjunction with onWritable.
 // Returns tuple [ok, hasResponded].
-type bodyOrChunkT = string;
 type totalSizeT = string;
 [@bs.send.pipe: t]
-external tryEnd: (bodyOrChunkT, totalSizeT) => (bool, bool) = "tryEnd";
+external tryEnd: (string, totalSizeT) => (bool, bool) = "tryEnd";
+external tryEndBuffer: (arrayBufferT, totalSizeT) => (bool, bool) = "tryEnd";
 
 // Immediately force closes the connection.
 [@bs.send.pipe: t] external close: unit => t = "close";

@@ -1,5 +1,6 @@
 module Response = Uws_Response;
 module Request = Uws_Request;
+module Websocket = Uws_Websocket;
 
 type t;
 
@@ -51,15 +52,21 @@ type listenCallbackT = unit => unit;
 external listenWithHost: (hostT, portT, listenCallbackT) => t = "listen";
 [@bs.send.pipe: t] external listen: (portT, listenCallbackT) => t = "listen";
 
-type pathT = string;
+type patternT = string;
 type handlerT = (Response.t, Request.t) => unit;
-[@bs.send.pipe: t] external get: (pathT, handlerT) => t = "get";
-[@bs.send.pipe: t] external post: (pathT, handlerT) => t = "post";
-[@bs.send.pipe: t] external options: (pathT, handlerT) => t = "options";
-[@bs.send.pipe: t] external del: (pathT, handlerT) => t = "del";
-[@bs.send.pipe: t] external patch: (pathT, handlerT) => t = "patch";
-[@bs.send.pipe: t] external put: (pathT, handlerT) => t = "put";
-[@bs.send.pipe: t] external head: (pathT, handlerT) => t = "head";
-[@bs.send.pipe: t] external connect: (pathT, handlerT) => t = "connect";
-[@bs.send.pipe: t] external trace: (pathT, handlerT) => t = "trace";
-[@bs.send.pipe: t] external any: (pathT, handlerT) => t = "any";
+[@bs.send.pipe: t] external get: (patternT, handlerT) => t = "get";
+[@bs.send.pipe: t] external post: (patternT, handlerT) => t = "post";
+[@bs.send.pipe: t] external options: (patternT, handlerT) => t = "options";
+[@bs.send.pipe: t] external del: (patternT, handlerT) => t = "del";
+[@bs.send.pipe: t] external patch: (patternT, handlerT) => t = "patch";
+[@bs.send.pipe: t] external put: (patternT, handlerT) => t = "put";
+[@bs.send.pipe: t] external head: (patternT, handlerT) => t = "head";
+[@bs.send.pipe: t] external connect: (patternT, handlerT) => t = "connect";
+[@bs.send.pipe: t] external trace: (patternT, handlerT) => t = "trace";
+[@bs.send.pipe: t] external any: (patternT, handlerT) => t = "any";
+//
+[@bs.send.pipe: t]
+external ws: (patternT, Websocket.websocketBehaviorT) => t = "ws";
+[@bs.send.pipe: t] external publish2: (patternT, string) => t = "publish";
+[@bs.send.pipe: t]
+external publish4: (patternT, string, bool, bool) => t = "publish";
