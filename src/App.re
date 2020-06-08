@@ -8,6 +8,7 @@ type handlerT = {
   route: Http.Route.t,
   req: Uws.Request.t,
   res: Uws.Response.t,
+  body: option(Js.Typed_array.array_buffer),
 };
 
 let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
@@ -27,7 +28,14 @@ let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
 
        let route = Http.Route.make(~method, ~path);
 
-       handler({route, req, res});
+       res
+       |> Http.Response.getBody(
+            data => {
+              let body = data^;
+              handler({route, req, res, body});
+            },
+            () => {Js.log("Not a body")},
+          );
      })
   |> Uws.listen(port, _ => {
        Js.log("Server started on port " ++ port->string_of_int)

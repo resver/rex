@@ -51,16 +51,16 @@ external tryEndBuffer: (arrayBufferT, totalSizeT) => (bool, bool) = "tryEnd";
 // Writing nothing is always success, so by default you must return true.
 type offsetT = float;
 type writableHandlerT = offsetT => bool;
-[@bs.send.pipe: t] external onWritable: writableHandlerT => t = "onWritable";
+[@bs.send.pipe: t] external onWritable: writableHandlerT => 'a = "onWritable";
 
-[@bs.send.pipe: t] external onAborted: (unit => unit) => t = "onAborted";
+[@bs.send.pipe: t] external onAborted: (unit => unit) => 'a = "onAborted";
 
 // Handler for reading data from POST and such requests.
 // You MUST copy the data of chunk if isLast is not true.
 // We Neuter ArrayBuffers on return, making it zero length.
 type isLastT = bool;
 [@bs.send.pipe: t]
-external onData: ((arrayBufferT, isLastT) => unit) => t = "onData";
+external onData: ((arrayBufferT, isLastT) => 'a) => 'b = "onData";
 
 // Returns the remote IP address
 [@bs.send.pipe: t]

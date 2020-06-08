@@ -1,5 +1,3 @@
 module Route = Http_Route;
-
-module Request = Uws_Request;
-
+module Request = Http_Request;
 module Response = Http_Response;
