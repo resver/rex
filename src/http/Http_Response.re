@@ -1,3 +1,5 @@
+include Uws_Response;
+
 let json = (data, res) => {
   let jsonString =
     switch (data |> Js.Json.stringifyAny) {

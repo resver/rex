@@ -4,7 +4,7 @@ module Default = {
   let home = res => res |> Http.Response.json({message: "hello world"});
 };
 
-let handler = (App.{route, req, res, body}) => {
+let httpHandler = (App.{route, res, body}) => {
   switch (route) {
   | Get([]) => Default.home(res)
   | Get(["user", userId]) =>
@@ -26,4 +26,4 @@ let handler = (App.{route, req, res, body}) => {
   };
 };
 
-App.make(~port=3030, ~handler, ());
+App.make(~port=3030, ~httpHandler, ());

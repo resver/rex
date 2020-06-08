@@ -12,7 +12,8 @@ type handlerT = {
   body: Body.t,
 };
 
-let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
+let make =
+    (~port=3030, ~config=?, ~httpHandler, ~wsHandler=?, ~isSSL=false, ()) => {
   let app =
     switch (config, isSSL) {
     | (Some(config), true) => uws |> Uws.app(config)
@@ -20,37 +21,46 @@ let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
     | (None, _) => uws |> Uws.appWithoutConfig()
     };
 
-  app
-  |> Uws.any("/*", (res, req) => {
-       let path = req |> Uws.Request.getUrl();
-       let method = req |> Uws.Request.getMethod();
+  let httpApp =
+    app
+    |> Uws.any("/*", (res, req) => {
+         let path = req |> Uws.Request.getUrl();
+         let method = req |> Uws.Request.getMethod();
 
-       let query = req |> Uws.Request.getQuery() |> Qs.parse;
+         let query = req |> Uws.Request.getQuery() |> Qs.parse;
 
-       let route = Http.Route.make(~method, ~path);
+         let route = Http.Route.make(~method, ~path);
 
-       switch (method) {
-       | "get"
-       | "head" => handler({route, req, res, body: NoBody, query})
-       | _ =>
-         let contentType = req |> Uws_Request.getHeader("content-type");
+         switch (method) {
+         | "get"
+         | "head" => httpHandler({route, req, res, body: NoBody, query})
+         | _ =>
+           let contentType = req |> Uws_Request.getHeader("content-type");
 
-         res
-         |> Body.getBody(
-              body => {
-                handler({
-                  route,
-                  req,
-                  res,
-                  query,
-                  body: Body.parseBody(body, contentType),
-                });
-                ();
-              },
-              () => {Js.log("Not a body")},
-            );
-       };
-     })
+           res
+           |> Body.getBody(
+                body => {
+                  httpHandler({
+                    route,
+                    req,
+                    res,
+                    query,
+                    body: Body.parseBody(body, contentType),
+                  });
+                  ();
+                },
+                () => {Js.log("Not a body")},
+              );
+         };
+       });
+
+  let finalApp =
+    switch (wsHandler) {
+    | Some(wsHandler) => httpApp |> Uws.ws("/*", wsHandler)
+    | None => httpApp
+    };
+
+  finalApp
   |> Uws.listen(port, _ => {
        Js.log("Server started on port " ++ port->string_of_int)
      });
