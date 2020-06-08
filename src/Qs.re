@@ -1,0 +1,1 @@
+[@bs.module "qs"] external parse: string => Js.Json.t = "parse";

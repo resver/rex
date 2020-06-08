@@ -8,7 +8,8 @@ type handlerT = {
   route: Http.Route.t,
   req: Uws.Request.t,
   res: Uws.Response.t,
-  body: option(Js.Typed_array.array_buffer),
+  query: Js.Json.t,
+  body: Body.t,
 };
 
 let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
@@ -24,18 +25,31 @@ let make = (~port=3030, ~config=?, ~handler, ~isSSL=false, ()) => {
        let path = req |> Uws.Request.getUrl();
        let method = req |> Uws.Request.getMethod();
 
-       let query = req |> Uws.Request.getQuery();
+       let query = req |> Uws.Request.getQuery() |> Qs.parse;
 
        let route = Http.Route.make(~method, ~path);
 
-       res
-       |> Http.Response.getBody(
-            data => {
-              let body = data^;
-              handler({route, req, res, body});
-            },
-            () => {Js.log("Not a body")},
-          );
+       switch (method) {
+       | "get"
+       | "head" => handler({route, req, res, body: NoBody, query})
+       | _ =>
+         let contentType = req |> Uws_Request.getHeader("content-type");
+
+         res
+         |> Body.getBody(
+              body => {
+                handler({
+                  route,
+                  req,
+                  res,
+                  query,
+                  body: Body.parseBody(body, contentType),
+                });
+                ();
+              },
+              () => {Js.log("Not a body")},
+            );
+       };
      })
   |> Uws.listen(port, _ => {
        Js.log("Server started on port " ++ port->string_of_int)
