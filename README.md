@@ -1,18 +1,6 @@
-Ultra fast node js framework
-built with uWebsockets.js and written in ReasonML
+# Rex
 
-# Build
+Ultra fast web framework
+built with uWebsockets and written in ReasonML
 
-```
-npm run build
-```
-
-# Watch
-
-```
-npm run watch
-```
-
-# Editor
-
-If you use `vscode`, Press `Windows + Shift + B` it will build automatically
+Minimal example can be found in `tests/Server.re`

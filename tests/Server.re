@@ -4,19 +4,6 @@ module Default = {
   let home = res => res |> Response.json({message: "hello world"});
 };
 
-module Topic = {
-  type t =
-    | Home
-    | Profile;
-
-  let show = topic => {
-    switch (topic) {
-    | Home => "/home"
-    | Profile => "/profile"
-    };
-  };
-};
-
 let httpHandler = (App.{route, res, body, pubsub}) => {
   switch (route) {
   | Get([]) => Default.home(res)
@@ -26,7 +13,7 @@ let httpHandler = (App.{route, res, body, pubsub}) => {
     )
 
   | Get(["hello"]) =>
-    pubsub.publish(Topic.show(Home), "world");
+    pubsub.publish("hello", "world");
     Response.(res |> status((200, "OK")) |> json({message: "data"}));
 
   | Post([]) =>
@@ -59,7 +46,7 @@ let createWsHandler = () => {
       },
     ~open_=
       (ws, req) => {
-        ws |> Websocket.subscribe("/hello");
+        ws |> Websocket.subscribe("hello");
         ();
       },
     ~message=
