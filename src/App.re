@@ -4,12 +4,17 @@ let uws = Uws.uws;
 let listen = Uws.listen;
 let listenWithHost = Uws.listenWithHost;
 
-type handlerT = {
+type httpHandlerT = {
   route: Http.Route.t,
   req: Uws.Request.t,
   res: Uws.Response.t,
   query: Js.Json.t,
   body: Body.t,
+};
+
+type wsHandlerT = {
+  config: string,
+  onMessage: string,
 };
 
 let make =

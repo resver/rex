@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "qs": "^6.9.4",
-    "uWebSockets.js": "uNetworking/uWebSockets.js#v18.0.0"
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v18.1.0"
   }
 }

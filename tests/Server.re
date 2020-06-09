@@ -26,4 +26,15 @@ let httpHandler = (App.{route, res, body}) => {
   };
 };
 
-App.make(~port=3030, ~httpHandler, ());
+let createWsHandler = () => {
+  Uws.Websocket.makeWebsocketBehavior(
+    ~open_=
+      (ws, req) => {
+        Js.log(ws);
+        Js.log(req);
+      },
+    (),
+  );
+};
+
+App.make(~port=3030, ~httpHandler, ~wsHandler=createWsHandler(), ());

@@ -12,6 +12,6 @@ qs@^6.9.4:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.4.tgz#9090b290d1f91728d3c22e54843ca44aea5ab687"
   integrity sha512-A1kFqHekCTM7cz0udomYUoYNWjBebHm/5wzU/XqrBRBNWectVH0QIiN+NEcZ0Dte5hvzHwbr8+XQmguPhJ6WdQ==
 
-uWebSockets.js@uNetworking/uWebSockets.js#v18.0.0:
-  version "18.0.0"
-  resolved "https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/70aa8148ba61e388af7f531c30688182d8a8d4d2"
+uWebSockets.js@uNetworking/uWebSockets.js#v18.1.0:
+  version "18.1.0"
+  resolved "https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/aca45709610cf42392f944230b38ff1f32c4c378"
