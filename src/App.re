@@ -5,9 +5,9 @@ let listen = Uws.listen;
 let listenWithHost = Uws.listenWithHost;
 
 type httpHandlerT = {
-  route: Http.Route.t,
-  req: Uws.Request.t,
-  res: Uws.Response.t,
+  route: Route.t,
+  req: Request.t,
+  res: Response.t,
   query: Js.Json.t,
   body: Body.t,
   publish2: (string, string) => unit,
@@ -30,12 +30,12 @@ let make =
   let httpApp =
     app
     |> Uws.any("/*", (res, req) => {
-         let path = req |> Uws.Request.getUrl();
-         let method = req |> Uws.Request.getMethod();
+         let path = req |> Request.getUrl();
+         let method = req |> Request.getMethod();
 
-         let query = req |> Uws.Request.getQuery() |> Qs.parse;
+         let query = req |> Request.getQuery() |> Qs.parse;
 
-         let route = Http.Route.make(~method, ~path);
+         let route = Route.make(~method, ~path);
 
          let publish2 = (topic, message) =>
            app |> Uws.publish2(topic, message);
@@ -45,17 +45,17 @@ let make =
          | "head" =>
            httpHandler({route, req, res, body: NoBody, query, publish2})
          | _ =>
-           let contentType = req |> Uws_Request.getHeader("content-type");
+           let contentType = req |> Request.getHeader("content-type");
 
            res
-           |> Body.getBody(
+           |> Body.get(
                 body => {
                   httpHandler({
                     route,
                     req,
                     res,
                     query,
-                    body: Body.parseBody(body, contentType),
+                    body: Body.parse(body, contentType),
                     publish2,
                   });
                   ();

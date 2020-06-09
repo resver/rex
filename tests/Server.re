@@ -1,7 +1,7 @@
 type resDataT = {message: string};
 
 module Default = {
-  let home = res => res |> Http.Response.json({message: "hello world"});
+  let home = res => res |> Response.json({message: "hello world"});
 };
 
 let httpHandler = (App.{route, res, body, publish2}) => {
@@ -15,9 +15,7 @@ let httpHandler = (App.{route, res, body, publish2}) => {
   | Get(["hello"]) =>
     publish2("/hello", "world");
 
-    res
-    |> Http.Response.status((200, "OK"))
-    |> Http.Response.json({message: "data"});
+    res |> Response.status((200, "OK")) |> Response.json({message: "data"});
 
   | Post([]) =>
     switch (body) {
@@ -26,9 +24,7 @@ let httpHandler = (App.{route, res, body, publish2}) => {
     | raw => Js.log(raw)
     };
 
-    res
-    |> Http.Response.status((200, "OK"))
-    |> Http.Response.json({message: "data"});
+    res |> Response.status((200, "OK")) |> Response.json({message: "data"});
   | _ => res |> Http.Response.json({message: "Not found"})
   };
 };
@@ -40,18 +36,18 @@ let createWsHandler = () => {
         Js.log("hello upgrade");
         Js.log(req |> Uws.Request.getHeader(""));
         res
-        |> Uws_Response.upgrade(
+        |> Response.upgrade(
              {"hello": "message"},
-             req |> Uws.Request.getHeader("sec-websocket-key"),
-             req |> Uws.Request.getHeader("sec-websocket-protocol"),
-             req |> Uws.Request.getHeader("sec-websocket-extensions"),
+             req |> Request.getHeader("sec-websocket-key"),
+             req |> Request.getHeader("sec-websocket-protocol"),
+             req |> Request.getHeader("sec-websocket-extensions"),
              ctx,
            );
         ();
       },
     ~open_=
       (ws, req) => {
-        ws |> Uws.Websocket.subscribe("/hello");
+        ws |> Websocket.subscribe("/hello");
         ();
       },
     ~message=

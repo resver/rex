@@ -11,6 +11,10 @@ let json = (data, res) => {
   |> Uws.Response.end1(jsonString);
 };
 
+let send = (data, res) => {
+  res |> Uws.Response.end1(data);
+};
+
 let status = ((code, message), res) => {
   res |> Uws.Response.writeStatus(code->string_of_int ++ " " ++ message);
 };

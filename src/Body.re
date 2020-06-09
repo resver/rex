@@ -14,7 +14,8 @@ module Buffer = {
   [@bs.send.pipe: 'a] external toJSON: unit => Js.Json.t = "toJSON";
 };
 
-let getBody:
+// TODO: rewrite this to reason
+let get:
   (Js.Typed_array.array_buffer => unit, unit => unit, Uws_Response.t) => unit = [%bs.raw
   {|
       function(cb, err, res) {
@@ -42,7 +43,7 @@ let getBody:
   |}
 ];
 
-let parseBody = (body, contentType) => {
+let parse = (body, contentType) => {
   switch (contentType) {
   | "application/json" =>
     try(Json(body |> Buffer.toString("utf-8") |> Js.Json.parseExn)) {
