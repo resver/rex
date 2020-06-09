@@ -10,7 +10,7 @@ type httpHandlerT = {
   res: Response.t,
   query: Js.Json.t,
   body: Body.t,
-  publish2: (string, string) => unit,
+  pubsub: PubSub.t,
 };
 
 type wsHandlerT = {
@@ -37,13 +37,21 @@ let make =
 
          let route = Route.make(~method, ~path);
 
-         let publish2 = (topic, message) =>
+         let publish = (topic, message) =>
            app |> Uws.publish2(topic, message);
+
+         let pubsub =
+           PubSub.{
+             publish,
+             subscribe: _ => {
+               Js.log("subscribe not available in http");
+             },
+           };
 
          switch (method) {
          | "get"
          | "head" =>
-           httpHandler({route, req, res, body: NoBody, query, publish2})
+           httpHandler({route, req, res, body: NoBody, query, pubsub})
          | _ =>
            let contentType = req |> Request.getHeader("content-type");
 
@@ -56,7 +64,7 @@ let make =
                     res,
                     query,
                     body: Body.parse(body, contentType),
-                    publish2,
+                    pubsub,
                   });
                   ();
                 },

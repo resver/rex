@@ -4,18 +4,30 @@ module Default = {
   let home = res => res |> Response.json({message: "hello world"});
 };
 
-let httpHandler = (App.{route, res, body, publish2}) => {
+module Topic = {
+  type t =
+    | Home
+    | Profile;
+
+  let show = topic => {
+    switch (topic) {
+    | Home => "/home"
+    | Profile => "/profile"
+    };
+  };
+};
+
+let httpHandler = (App.{route, res, body, pubsub}) => {
   switch (route) {
   | Get([]) => Default.home(res)
   | Get(["user", userId]) =>
-    res
-    |> Http.Response.status((200, "OK"))
-    |> Http.Response.json({message: "hello user " ++ userId})
+    Response.(
+      res |> status((200, "OK")) |> json({message: "hello user " ++ userId})
+    )
 
   | Get(["hello"]) =>
-    publish2("/hello", "world");
-
-    res |> Response.status((200, "OK")) |> Response.json({message: "data"});
+    pubsub.publish(Topic.show(Home), "world");
+    Response.(res |> status((200, "OK")) |> json({message: "data"}));
 
   | Post([]) =>
     switch (body) {
@@ -24,8 +36,8 @@ let httpHandler = (App.{route, res, body, publish2}) => {
     | raw => Js.log(raw)
     };
 
-    res |> Response.status((200, "OK")) |> Response.json({message: "data"});
-  | _ => res |> Http.Response.json({message: "Not found"})
+    Response.(res |> status((200, "OK")) |> json({message: "data"}));
+  | _ => Response.(res |> json({message: "Not found"}))
   };
 };
 

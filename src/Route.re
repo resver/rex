@@ -1,34 +1,17 @@
-type pathT = list(string);
 type t =
-  | Get(pathT)
-  | Post(pathT)
-  | Put(pathT)
-  | Patch(pathT)
-  | Delete(pathT)
-  | Options(pathT)
-  | Head(pathT)
-  | Connect(pathT)
-  | Trace(pathT)
-  | Any(pathT);
-
-let pathToList =
-  fun
-  | ""
-  | "/" => []
-  | raw => {
-      /* remove the preceeding /, which every pathname seems to have */
-      let raw = Js.String.sliceToEnd(~from=1, raw);
-      /* remove the trailing /, which some pathnames might have. Ugh */
-      let raw =
-        switch (Js.String.get(raw, Js.String.length(raw) - 1)) {
-        | "/" => Js.String.slice(~from=0, ~to_=-1, raw)
-        | _ => raw
-        };
-      raw |> Js.String.split("/") |> Array.to_list;
-    };
+  | Get(Path.t)
+  | Post(Path.t)
+  | Put(Path.t)
+  | Patch(Path.t)
+  | Delete(Path.t)
+  | Options(Path.t)
+  | Head(Path.t)
+  | Connect(Path.t)
+  | Trace(Path.t)
+  | Any(Path.t);
 
 let make = (~method, ~path) => {
-  let pathList = pathToList(path);
+  let pathList = Path.fromString(path);
 
   switch (method) {
   | "get" => Get(pathList)
