@@ -3,7 +3,7 @@ type t =
   | Text(string)
   | Json(Js.Json.t)
   | Form(formT)
-  | NoBody
+  | Empty
 and formT = list((string, string));
 
 module Buffer = {
@@ -15,7 +15,7 @@ module Buffer = {
 };
 
 // TODO: rewrite this to reason
-let get:
+let getFromBuffer:
   (Js.Typed_array.array_buffer => unit, unit => unit, Uws_Response.t) => unit = [%bs.raw
   {|
       function(cb, err, res) {
@@ -43,7 +43,7 @@ let get:
   |}
 ];
 
-let parse = (body, contentType) => {
+let make = (body, contentType) => {
   switch (contentType) {
   | "application/json" =>
     try(Json(body |> Buffer.toString("utf-8") |> Js.Json.parseExn)) {

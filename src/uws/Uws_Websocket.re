@@ -67,10 +67,10 @@ external upgrade: (Uws_Response.t, Uws_Response.t, 'a) => unit = "publish";
 external getRemoteAddress: unit => arrayBufferT = "getRemoteAddress";
 
 type websocketBehaviorT = {
-  maxPayloadLength: option(float),
-  idleTimeout: option(float),
-  compression: option(float),
-  maxBackpressure: option(float),
+  maxPayloadLength: option(int),
+  idleTimeout: option(int),
+  compression: option(int),
+  maxBackpressure: option(int),
   [@bs.as "open"]
   open_: option((t, Uws_Request.t) => unit),
   upgrade:

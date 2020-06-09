@@ -4,22 +4,21 @@ let uws = Uws.uws;
 let listen = Uws.listen;
 let listenWithHost = Uws.listenWithHost;
 
-type httpHandlerT = {
-  route: Route.t,
-  req: Request.t,
-  res: Response.t,
-  query: Js.Json.t,
-  body: Body.t,
-  pubsub: PubSub.t,
-};
-
 type wsHandlerT = {
   config: string,
-  onMessage: string,
+  onMessage: Websocket.t,
 };
 
 let make =
-    (~port=3030, ~config=?, ~httpHandler, ~wsHandler=?, ~isSSL=false, ()) => {
+    (
+      ~port=3030,
+      ~onListen=_ => (),
+      ~config=?,
+      ~httpHandler,
+      ~wsHandler=?,
+      ~isSSL=false,
+      (),
+    ) => {
   let app =
     switch (config, isSSL) {
     | (Some(config), true) => uws |> Uws.app(config)
@@ -27,60 +26,13 @@ let make =
     | (None, _) => uws |> Uws.appWithoutConfig()
     };
 
-  let httpApp =
-    app
-    |> Uws.any("/*", (res, req) => {
-         let path = req |> Request.getUrl();
-         let method = req |> Request.getMethod();
-
-         let query = req |> Request.getQuery() |> Qs.parse;
-
-         let route = Route.make(~method, ~path);
-
-         let publish = (topic, message) =>
-           app |> Uws.publish2(topic, message);
-
-         let pubsub =
-           PubSub.{
-             publish,
-             subscribe: _ => {
-               Js.log("subscribe not available in http");
-             },
-           };
-
-         switch (method) {
-         | "get"
-         | "head" =>
-           httpHandler({route, req, res, body: NoBody, query, pubsub})
-         | _ =>
-           let contentType = req |> Request.getHeader("content-type");
-
-           res
-           |> Body.get(
-                body => {
-                  httpHandler({
-                    route,
-                    req,
-                    res,
-                    query,
-                    body: Body.parse(body, contentType),
-                    pubsub,
-                  });
-                  ();
-                },
-                () => {Js.log("Not a body")},
-              );
-         };
-       });
+  let httpApp = app |> HttpHandler.makeApp(httpHandler);
 
   let finalApp =
     switch (wsHandler) {
-    | Some(wsHandler) => httpApp |> Uws.ws("/*", wsHandler)
+    | Some(wsHandler) => httpApp |> WebsocketHandler.makeApp(wsHandler)
     | None => httpApp
     };
 
-  finalApp
-  |> Uws.listen(port, _ => {
-       Js.log("Server started on port " ++ port->string_of_int)
-     });
+  finalApp |> Uws.listen(port, onListen);
 };

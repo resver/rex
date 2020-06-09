@@ -4,7 +4,7 @@ module Default = {
   let home = res => res |> Response.json({message: "hello world"});
 };
 
-let httpHandler = (App.{route, res, body, pubsub}) => {
+let httpHandler = (HttpHandler.{route, res, body, pubsub}) => {
   switch (route) {
   | Get([]) => Default.home(res)
   | Get(["user", userId]) =>
@@ -28,34 +28,11 @@ let httpHandler = (App.{route, res, body, pubsub}) => {
   };
 };
 
-let createWsHandler = () => {
-  Uws.Websocket.makeWebsocketBehavior(
-    ~upgrade=
-      (res, req, ctx) => {
-        Js.log("hello upgrade");
-        Js.log(req |> Uws.Request.getHeader(""));
-        res
-        |> Response.upgrade(
-             {"hello": "message"},
-             req |> Request.getHeader("sec-websocket-key"),
-             req |> Request.getHeader("sec-websocket-protocol"),
-             req |> Request.getHeader("sec-websocket-extensions"),
-             ctx,
-           );
-        ();
-      },
-    ~open_=
-      (ws, req) => {
-        ws |> Websocket.subscribe("hello");
-        ();
-      },
-    ~message=
-      (ws, message, isBinary) => {
-        Js.log(message);
-        ();
-      },
+let wsHandler =
+  WebsocketHandler.make(
+    ~onUpgrade=(req, res) => Js.log("upgrader"),
+    ~onOpen=data => Js.log(data),
     (),
   );
-};
 
-App.make(~port=3030, ~httpHandler, ~wsHandler=createWsHandler(), ());
+App.make(~port=3030, ~httpHandler, ~wsHandler, ());

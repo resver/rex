@@ -10,19 +10,19 @@ type t =
   | Trace(Path.t)
   | Any(Path.t);
 
-let make = (~method, ~path) => {
-  let pathList = Path.fromString(path);
+let make = (~method: Method.t, ~path) => {
+  let pathList = Path.make(path);
 
   switch (method) {
-  | "get" => Get(pathList)
-  | "post" => Post(pathList)
-  | "put" => Put(pathList)
-  | "patch" => Patch(pathList)
-  | "delete" => Delete(pathList)
-  | "options" => Options(pathList)
-  | "head" => Head(pathList)
-  | "connect" => Connect(pathList)
-  | "trace" => Trace(pathList)
-  | _ => Any(pathList)
+  | Get => Get(pathList)
+  | Post => Post(pathList)
+  | Put => Put(pathList)
+  | Patch => Patch(pathList)
+  | Delete => Delete(pathList)
+  | Options => Options(pathList)
+  | Head => Head(pathList)
+  | Connect => Connect(pathList)
+  | Trace => Trace(pathList)
+  | Unknown(_) => Any(pathList)
   };
 };

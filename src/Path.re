@@ -1,6 +1,6 @@
 type t = list(string);
 
-let fromString =
+let make =
   fun
   | ""
   | "/" => []

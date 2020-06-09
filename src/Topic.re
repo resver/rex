@@ -1,13 +1,12 @@
 // mqtt topic syntax
 
-type topicLevel =
+type t = list(topicLevel)
+and topicLevel =
   | String(string)
   | SingleLevelWildcard
   | MultiLevelWildcard;
 
-type t = list(topicLevel);
-
-let fromString = str =>
+let make = str =>
   str
   |> Js.String.split("/")
   |> Array.map(item =>
