@@ -10,6 +10,7 @@ type httpHandlerT = {
   res: Uws.Response.t,
   query: Js.Json.t,
   body: Body.t,
+  publish2: (string, string) => unit,
 };
 
 type wsHandlerT = {
@@ -36,9 +37,13 @@ let make =
 
          let route = Http.Route.make(~method, ~path);
 
+         let publish2 = (topic, message) =>
+           app |> Uws.publish2(topic, message);
+
          switch (method) {
          | "get"
-         | "head" => httpHandler({route, req, res, body: NoBody, query})
+         | "head" =>
+           httpHandler({route, req, res, body: NoBody, query, publish2})
          | _ =>
            let contentType = req |> Uws_Request.getHeader("content-type");
 
@@ -51,6 +56,7 @@ let make =
                     res,
                     query,
                     body: Body.parseBody(body, contentType),
+                    publish2,
                   });
                   ();
                 },

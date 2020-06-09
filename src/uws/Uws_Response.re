@@ -79,3 +79,6 @@ external getRemoteAddress: unit => arrayBufferT = "getRemoteAddress";
  *   res.writeStatus("200 OK").writeHeader("Some", "Value").write("Hello world!");
  * }); */
 [@bs.send.pipe: t] external cork: (unit => unit) => unit = "cork";
+
+[@bs.send.pipe: t]
+external upgrade: ('a, string, string, string, 'b) => unit = "upgrade";

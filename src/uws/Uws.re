@@ -67,6 +67,6 @@ type handlerT = (Response.t, Request.t) => unit;
 //
 [@bs.send.pipe: t]
 external ws: (patternT, Websocket.websocketBehaviorT) => t = "ws";
-[@bs.send.pipe: t] external publish2: (patternT, string) => t = "publish";
+[@bs.send.pipe: t] external publish2: (patternT, string) => unit = "publish";
 [@bs.send.pipe: t]
-external publish4: (patternT, string, bool, bool) => t = "publish";
+external publish4: (patternT, string, bool, bool) => unit = "publish";

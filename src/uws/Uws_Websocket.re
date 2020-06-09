@@ -45,18 +45,21 @@ external unsubscribeBuffer: arrayBufferT => bool = "unsubscribe";
 // Unsubscribe from all topics.
 [@bs.send.pipe: t] external unsubscribeAll: unit => unit = "unsubscribeAll";
 
-[@bs.send.pipe: t] external publish2: (string, string) => t = "publish";
+[@bs.send.pipe: t] external publish2: (string, string) => unit = "publish";
 [@bs.send.pipe: t]
-external publishBuffer2: (string, arrayBufferT) => t = "publish";
+external publishBuffer2: (string, arrayBufferT) => unit = "publish";
 [@bs.send.pipe: t]
-external publish3: (string, string, isBinaryT) => t = "publish";
+external publish3: (string, string, isBinaryT) => unit = "publish";
 [@bs.send.pipe: t]
-external publishBuffer3: (string, arrayBufferT, isBinaryT) => t = "publish";
+external publishBuffer3: (string, arrayBufferT, isBinaryT) => unit = "publish";
 [@bs.send.pipe: t]
-external publish4: (string, string, isBinaryT, compressT) => t = "publish";
+external publish4: (string, string, isBinaryT, compressT) => unit = "publish";
 [@bs.send.pipe: t]
-external publishBuffer4: (string, arrayBufferT, isBinaryT, compressT) => t =
+external publishBuffer4: (string, arrayBufferT, isBinaryT, compressT) => unit =
   "publish";
+
+[@bs.send.pipe: t]
+external upgrade: (Uws_Response.t, Uws_Response.t, 'a) => unit = "publish";
 
 [@bs.send.pipe: t] external cork: (unit => unit) => unit = "cork";
 
@@ -70,6 +73,8 @@ type websocketBehaviorT = {
   maxBackpressure: option(float),
   [@bs.as "open"]
   open_: option((t, Uws_Request.t) => unit),
+  upgrade:
+    option((Uws_Response.t, Uws_Request.t, option(Js.Json.t)) => unit),
   message: option((t, string, isBinaryT) => unit),
   messageBuffer: option((t, arrayBufferT, isBinaryT) => unit),
   drain: option(t => unit),
@@ -86,6 +91,7 @@ let makeWebsocketBehavior =
       ~maxBackpressure=?,
       ~open_=?,
       ~message=?,
+      ~upgrade=?,
       ~messageBuffer=?,
       ~drain=?,
       ~close=?,
@@ -99,6 +105,7 @@ let makeWebsocketBehavior =
     compression,
     maxBackpressure,
     open_,
+    upgrade,
     message,
     messageBuffer,
     drain,
