@@ -14,8 +14,8 @@ let make =
       ~port=3030,
       ~onListen=_ => (),
       ~config=?,
-      ~httpHandler,
-      ~wsHandler=?,
+      ~httpHandlers: option(list(HttpHandler.t))=?,
+      ~wsHandlers=?,
       ~isSSL=false,
       (),
     ) => {
@@ -26,13 +26,25 @@ let make =
     | (None, _) => uws |> Uws.appWithoutConfig()
     };
 
-  let httpApp = app |> HttpHandler.makeApp(httpHandler);
-
-  let finalApp =
-    switch (wsHandler) {
-    | Some(wsHandler) => httpApp |> WebsocketHandler.makeApp(wsHandler)
-    | None => httpApp
+  let httpApp =
+    switch (httpHandlers) {
+    | Some(httpHandlers) =>
+      httpHandlers
+      |> List.fold_left(
+           (app: Uws.t, httpHandler: HttpHandler.t) =>
+             app |> HttpHandler.(makeApp(httpHandler)),
+           app,
+         )
+    | None => app
     };
 
-  finalApp |> Uws.listen(port, onListen);
+  // let finalApp =
+  //   switch (wsHandlers) {
+  //   | Some(wsHandler) =>
+  //     httpApp |> WebsocketHandler.makeApp(wsHandler)
+  //   | None => httpApp
+  //   };
+
+  // finalApp |> Uws.listen(port, onListen);
+  httpApp |> Uws.listen(port, onListen);
 };

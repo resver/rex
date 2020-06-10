@@ -46,12 +46,16 @@ let getFromBuffer:
 let make = (body, contentType) => {
   switch (contentType) {
   | "application/json" =>
-    try(Json(body |> Buffer.toString("utf-8") |> Js.Json.parseExn)) {
+    try(
+      Json(
+        body |> Buffer.from |> Buffer.toString("utf-8") |> Js.Json.parseExn,
+      )
+    ) {
     | _ => Raw(body)
     }
   | "application/x-www-form-urlencoded" =>
-    Json(body |> Buffer.toString("utf-8") |> Qs.parse)
-  | "text/plain" => Text(body |> Buffer.toString("utf-8"))
+    Json(body |> Buffer.from |> Buffer.toString("utf-8") |> Qs.parse)
+  | "text/plain" => Text(body |> Buffer.from |> Buffer.toString("utf-8"))
   | _ => Raw(body)
   };
 };

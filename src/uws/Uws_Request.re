@@ -24,7 +24,7 @@ external getHeaderBuffer: arrayBufferT => string = "getHeader";
 type headerKeyT = string;
 type headerValueT = string;
 [@bs.send.pipe: t]
-external forEach: (headerKeyT, headerValueT => unit) => unit = "forEach";
+external forEach: ((headerKeyT, headerValueT) => unit) => unit = "forEach";
 
 // Setting yield to true is to say that
 // this route handler did not handle the route,

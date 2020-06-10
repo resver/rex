@@ -1,5 +1,9 @@
 # Rex
 
+## [WIP] +experimental
+
+> API likely will change
+
 Ultra fast web framework
 built with uWebsockets and written in ReasonML
 
