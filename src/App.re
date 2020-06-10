@@ -28,13 +28,7 @@ let make =
 
   let httpApp =
     switch (httpHandlers) {
-    | Some(httpHandlers) =>
-      httpHandlers
-      |> List.fold_left(
-           (app: Uws.t, httpHandler: HttpHandler.t) =>
-             app |> HttpHandler.(makeApp(httpHandler)),
-           app,
-         )
+    | Some(httpHandlers) => app |> HttpHandler.makeApp(httpHandlers)
     | None => app
     };
 

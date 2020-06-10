@@ -49,7 +49,6 @@ let makeApp = (handler, pubsub, app) => {
           | None => ()
           };
 
-          Js.log(ctx);
           req |> Request.forEach((k, v) => Js.log2(k, v));
 
           res

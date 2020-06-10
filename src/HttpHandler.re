@@ -10,42 +10,44 @@ type handlerT = {
 type namespaceT = string;
 type t = (namespaceT, handlerT => unit);
 
-let makeApp = ((namespace, handler), app) => {
-  let namespacePath =
-    switch (namespace) {
-    | "/"
-    | "*"
-    | "" => "/*"
-    | _ => "/" ++ namespace ++ "/*"
-    };
-
+let makeApp = (handlers: list(t), app: Uws.t) => {
   app
-  |> Uws.any(
-       namespacePath,
-       (res, req) => {
-         let path = req |> Request.getUrl();
+  |> Uws.any("/*", (res, req) => {
+       let rawPath = req |> Request.getUrl();
 
-         let method = req |> Request.getMethod() |> Method.make;
+       let method = req |> Request.getMethod() |> Method.make;
 
-         let query = req |> Request.getQuery() |> Qs.parse;
+       let query = req |> Request.getQuery() |> Qs.parse;
 
-         let route = Route.make(~method, ~path, ~namespace);
+       // pick one handler from list of handlers
+       let (rawNamespace, handler) =
+         handlers
+         |> List.find(((rawNamespace, _): t) => {
+              let normalizedPath =
+                Path.(rawPath |> removePreceeding |> removeTrailing);
 
-         let handlerFromBody = body =>
-           handler({route, req, res, body, query});
+              let normalizedNamespace =
+                Path.(rawNamespace |> removePreceeding |> removeTrailing);
 
-         switch (method) {
-         | Get
-         | Head => handlerFromBody(Empty)
-         | _ =>
-           let contentType = req |> Request.getHeader("content-type");
+              Js.log([|normalizedPath, normalizedNamespace|]);
 
-           res
-           |> Body.getFromBuffer(
-                body => {handlerFromBody(Body.make(body, contentType))},
-                () => {Js.log("Not a body")},
-              );
-         };
-       },
-     );
+              normalizedPath |> Js.String.startsWith(normalizedNamespace);
+            });
+
+       Js.log(Path.(rawNamespace |> removePreceeding |> removeTrailing));
+
+       let route = Route.make(~method, ~rawPath, ~rawNamespace);
+       let handlerFromBody = body => handler({route, req, res, body, query});
+       switch (method) {
+       | Get
+       | Head => handlerFromBody(Empty)
+       | _ =>
+         let contentType = req |> Request.getHeader("content-type");
+         res
+         |> Body.getFromBuffer(
+              body => {handlerFromBody(Body.make(body, contentType))},
+              () => {Js.log("Not a body")},
+            );
+       };
+     });
 };

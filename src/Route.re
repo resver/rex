@@ -10,36 +10,21 @@ type t =
   | Trace(Path.t)
   | Any(Path.t);
 
-let make = (~method: Method.t, ~path, ~namespace) => {
-  let pathList = Path.make(path);
+let make = (~method: Method.t, ~rawPath, ~rawNamespace) => {
+  let pathList = Path.make(~rawPath, ~rawNamespace);
 
-  Js.log(namespace);
-  Js.log(path);
-  Js.log(pathList |> Array.of_list);
-
-  let p =
-    switch (namespace) {
-    | "" => pathList
-    | _ =>
-      switch (pathList) {
-      | [] => [] // is impossible
-      | [_] => [] // delete first element
-      | [_, ...tl] => tl
-      }
-    };
-
-  Js.log(p |> Array.of_list);
+  Js.log3(rawPath, rawNamespace, pathList |> Array.of_list);
 
   switch (method) {
-  | Get => Get(p)
-  | Post => Post(p)
-  | Put => Put(p)
-  | Patch => Patch(p)
-  | Delete => Delete(p)
-  | Options => Options(p)
-  | Head => Head(p)
-  | Connect => Connect(p)
-  | Trace => Trace(p)
-  | Unknown(_) => Any(p)
+  | Get => Get(pathList)
+  | Post => Post(pathList)
+  | Put => Put(pathList)
+  | Patch => Patch(pathList)
+  | Delete => Delete(pathList)
+  | Options => Options(pathList)
+  | Head => Head(pathList)
+  | Connect => Connect(pathList)
+  | Trace => Trace(pathList)
+  | Unknown(_) => Any(pathList)
   };
 };
