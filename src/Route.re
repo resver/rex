@@ -13,8 +13,6 @@ type t =
 let make = (~method: Method.t, ~rawPath, ~rawNamespace) => {
   let pathList = Path.make(~rawPath, ~rawNamespace);
 
-  Js.log3(rawPath, rawNamespace, pathList |> Array.of_list);
-
   switch (method) {
   | Get => Get(pathList)
   | Post => Post(pathList)

@@ -1,6 +1,7 @@
-type t('a) = {
+type t = (string, handlerT)
+and handlerT = {
   onUpgrade: option((Request.t, Response.t) => unit),
-  onOpen: option((PubSub.t, Websocket.t) => unit),
+  onOpen: option(Websocket.t => unit),
   onMessage: option((Body.t, Websocket.t) => unit),
   config: option(configT),
 }
@@ -33,7 +34,14 @@ let make = (~config=?, ~onUpgrade=?, ~onOpen=?, ~onMessage=?, ()) => {
   handler;
 };
 
-let makeApp = (handler, pubsub, app) => {
+let makeApp = (handlers, app) => {
+  let (namespace, handler) =
+    handlers
+    |> List.find(((namespace, handler)) => {
+         Js.log(namespace);
+         true;
+       });
+
   let config = handler.config;
 
   let wsBehavior =
@@ -49,7 +57,7 @@ let makeApp = (handler, pubsub, app) => {
           | None => ()
           };
 
-          req |> Request.forEach((k, v) => Js.log2(k, v));
+          // req |> Request.forEach((k, v) => Js.log2(k, v));
 
           res
           |> Response.upgrade(
@@ -64,7 +72,7 @@ let makeApp = (handler, pubsub, app) => {
       ~open_=
         (ws, req) => {
           switch (handler.onOpen) {
-          | Some(onOpen) => ws |> onOpen(pubsub)
+          | Some(onOpen) => ws |> onOpen
           | None => ()
           }
         },

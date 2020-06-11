@@ -20,21 +20,16 @@ let makeApp = (handlers: list(t), app: Uws.t) => {
        let query = req |> Request.getQuery() |> Qs.parse;
 
        // pick one handler from list of handlers
+       // by check prefix of path == namespace
        let (rawNamespace, handler) =
          handlers
          |> List.find(((rawNamespace, _): t) => {
-              let normalizedPath =
-                Path.(rawPath |> removePreceeding |> removeTrailing);
+              let normalizedPath = Path.(rawPath |> removePreceeding);
 
               let normalizedNamespace =
-                Path.(rawNamespace |> removePreceeding |> removeTrailing);
-
-              Js.log([|normalizedPath, normalizedNamespace|]);
-
+                Path.(rawNamespace |> removePreceeding);
               normalizedPath |> Js.String.startsWith(normalizedNamespace);
             });
-
-       Js.log(Path.(rawNamespace |> removePreceeding |> removeTrailing));
 
        let route = Route.make(~method, ~rawPath, ~rawNamespace);
        let handlerFromBody = body => handler({route, req, res, body, query});

@@ -4,10 +4,7 @@ let uws = Uws.uws;
 let listen = Uws.listen;
 let listenWithHost = Uws.listenWithHost;
 
-type wsHandlerT = {
-  config: string,
-  onMessage: Websocket.t,
-};
+
 
 let make =
     (
@@ -15,7 +12,7 @@ let make =
       ~onListen=_ => (),
       ~config=?,
       ~httpHandlers: option(list(HttpHandler.t))=?,
-      ~wsHandlers=?,
+      ~wsHandlers: option(list(WebsocketHandler.t))=?,
       ~isSSL=false,
       (),
     ) => {
@@ -26,19 +23,17 @@ let make =
     | (None, _) => uws |> Uws.appWithoutConfig()
     };
 
-  let httpApp =
+  let createHttpApp = app =>
     switch (httpHandlers) {
-    | Some(httpHandlers) => app |> HttpHandler.makeApp(httpHandlers)
+    | Some(handlers) => app |> HttpHandler.makeApp(handlers)
     | None => app
     };
 
-  // let finalApp =
-  //   switch (wsHandlers) {
-  //   | Some(wsHandler) =>
-  //     httpApp |> WebsocketHandler.makeApp(wsHandler)
-  //   | None => httpApp
-  //   };
+  let createWsApp = app =>
+    switch (wsHandlers) {
+    | Some(handlers) => app |> WebsocketHandler.makeApp(handlers)
+    | None => app
+    };
 
-  // finalApp |> Uws.listen(port, onListen);
-  httpApp |> Uws.listen(port, onListen);
+  app |> createHttpApp |> createWsApp |> Uws.listen(port, onListen);
 };
