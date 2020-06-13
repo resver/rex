@@ -34,9 +34,9 @@ type bodyT = string;
 // Use in conjunction with onWritable.
 // Returns tuple [ok, hasResponded].
 type totalSizeT = string;
+[@bs.send.pipe: t] external tryEnd: (string, int) => (bool, bool) = "tryEnd";
 [@bs.send.pipe: t]
-external tryEnd: (string, totalSizeT) => (bool, bool) = "tryEnd";
-external tryEndBuffer: (arrayBufferT, totalSizeT) => (bool, bool) = "tryEnd";
+external tryEndBuffer: (arrayBufferT, int) => (bool, bool) = "tryEnd";
 
 // Immediately force closes the connection.
 [@bs.send.pipe: t] external close: unit => t = "close";

@@ -17,10 +17,33 @@ let sendText = (data, res) => {
 };
 
 let sendJson = (data, res) => {
-  let jsonString =
-    switch (data |> Js.Json.stringifyAny) {
-    | Some(data) => data
-    | None => "Error parsing json"
-    };
-  res |> setContentType("application/json") |> send(jsonString);
+  switch (data |> Js.Json.stringifyAny) {
+  | Some(data) => res |> setContentType("application/json") |> send(data)
+  | None =>
+    res
+    |> setStatus((500, "Internal Server Error"))
+    |> send("Parsing Json Error")
+  };
+  ();
+};
+
+let sendFile = (filePath, res) => {
+  let isFileExist = Node.Fs.existsSync(filePath);
+  let toArrayBuffer: 'a => arrayBufferT = [%bs.raw
+    {|
+            function toArrayBuffer(buffer) {
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+  }
+            |}
+  ];
+
+  let file = Node.Fs.readFileSync(filePath) |> toArrayBuffer;
+
+  isFileExist
+    ? {
+      res |> endBuffer1(file);
+    }
+    : res
+      |> setStatus((500, "Internal Server Error"))
+      |> send("File is not exist: " ++ filePath);
 };
