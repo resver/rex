@@ -1,30 +1,27 @@
 type wsOpenContextT('a) = {
-  namespace: string,
   path: Path.t,
   query: Js.Json.t,
   pubsub: PubSub.t('a),
 };
 type wsMessageContextT('a) = {
   body: Body.t,
-  namespace: string,
   path: Path.t,
   query: Js.Json.t,
   pubsub: PubSub.t('a),
 };
 
-type t('ctx, 'a) = (string, handlerT('ctx, 'a))
-and handlerT('ctx, 'a) = {
+type t('ctx, 'a) = {
   onOpen: option(wsOpenContextT('a) => unit),
   onMessage: option(wsMessageContextT('a) => unit),
-};
-type configT = {
+  config: option(configT),
+}
+and configT = {
   maxPayloadLength: option(int),
   idleTimeout: option(int),
   compression: option(int),
   maxBackpressure: option(int),
 };
 type wsUpgradeContextT = {
-  rawNamespace: string,
   rawPath: string,
   rawQuery: string,
 };
@@ -47,46 +44,13 @@ let makeConfig =
   config;
 };
 
-let make = (~onOpen=?, ~onMessage=?, ()) => {
-  let handler = {onOpen, onMessage};
+let make = (~onOpen=?, ~config=?, ~onMessage=?, ()) => {
+  let handler = {onOpen, config, onMessage};
   handler;
 };
 
-let makeApp = (handlers, ~config=?, app) => {
-  let findHandlerByRawPath = rawPath =>
-    try(
-      handlers
-      |> List.find(((rawNamespace, _): t('ctx, 'a)) => {
-           let normalizedPath =
-             Path.(rawPath |> removePreceeding |> removeTrailing);
-
-           let normalizedNamespace =
-             Path.(rawNamespace |> removePreceeding |> removeTrailing);
-
-           let found =
-             switch (normalizedNamespace, normalizedPath) {
-             | ("", _) => true
-             | (namespace, path) =>
-               path == namespace
-               || path
-               |> Js.String.startsWith(namespace ++ "/")
-             };
-           found;
-         })
-    ) {
-    | Not_found => ("", make())
-    };
-
-  let findHandlerByRawNamespace = rawNamespace =>
-    try(
-      handlers
-      |> List.find(((namespace, _): t('ctx, 'a)) => {
-           rawNamespace == namespace
-         })
-    ) {
-    | Not_found => ("", make())
-    };
-
+let makeApp = (handler, app) => {
+  let config = handler.config;
   let wsBehavior =
     Websocket.makeWebsocketBehavior(
       ~maxPayloadLength=?config >>= (c => c.maxPayloadLength),
@@ -100,11 +64,9 @@ let makeApp = (handlers, ~config=?, app) => {
           let rawPath = req |> Request.getUrl();
           let rawQuery = req |> Request.getQuery();
 
-          let (rawNamespace, _) = findHandlerByRawPath(rawPath);
-
           res
           |> Response.upgrade(
-               {rawQuery, rawPath, rawNamespace},
+               {rawQuery, rawPath},
                req |> Request.getHeader("sec-websocket-key"),
                req |> Request.getHeader("sec-websocket-protocol"),
                req |> Request.getHeader("sec-websocket-extensions"),
@@ -116,24 +78,16 @@ let makeApp = (handlers, ~config=?, app) => {
       ~open_=
         (ws, _) => {
           let rawPath = ws |> Websocket.getRawPath;
-          let rawNamespace = ws |> Websocket.getRawNamespace;
           let rawQuery = ws |> Websocket.getRawQuery;
 
-          switch (rawNamespace) {
-          | Some(rawNamespace) =>
-            let (_, handler) = findHandlerByRawNamespace(rawNamespace);
-            switch (handler.onOpen) {
-            | Some(onOpen) =>
-              let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace);
-              let query = rawQuery |? "" |> Qs.parse;
-              let namespace =
-                rawNamespace |> Path.removePreceeding |> Path.removeTrailing;
+          switch (handler.onOpen) {
+          | Some(onOpen) =>
+            let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace="");
+            let query = rawQuery |? "" |> Qs.parse;
 
-              let pubsub = ws |> PubSub.make(namespace);
+            let pubsub = ws |> PubSub.make;
 
-              onOpen({path, query, namespace, pubsub});
-            | None => ()
-            };
+            onOpen({path, query, pubsub});
           | None => ()
           };
         },
@@ -141,25 +95,17 @@ let makeApp = (handlers, ~config=?, app) => {
         (ws, message, _) => {
           // Js.log(ws);
           let rawPath = ws |> Websocket.getRawPath;
-          let rawNamespace = ws |> Websocket.getRawNamespace;
           let rawQuery = ws |> Websocket.getRawQuery;
 
-          switch (rawNamespace) {
-          | Some(rawNamespace) =>
-            let (_, handler) = findHandlerByRawNamespace(rawNamespace);
-            switch (handler.onMessage) {
-            | Some(onMessage) =>
-              let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace);
-              let query = rawQuery |? "" |> Qs.parse;
-              let body = Body.make(message, "application/json");
-              let namespace =
-                rawNamespace |> Path.removePreceeding |> Path.removeTrailing;
+          switch (handler.onMessage) {
+          | Some(onMessage) =>
+            let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace="");
+            let query = rawQuery |? "" |> Qs.parse;
+            let body = Body.make(message, "application/json");
 
-              let pubsub = ws |> PubSub.make(namespace);
+            let pubsub = ws |> PubSub.make;
 
-              onMessage({body, path, query, namespace, pubsub});
-            | None => ()
-            };
+            onMessage({body, path, query, pubsub});
           | None => ()
           };
         },

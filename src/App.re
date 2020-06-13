@@ -10,8 +10,7 @@ let make =
       ~onListen=_ => (),
       ~config=?,
       ~httpHandlers: option(list(HttpHandler.t('a)))=?,
-      ~wsHandlers: option(list(WebsocketHandler.t('ctx, 'a)))=?,
-      ~wsConfig=?,
+      ~wsHandler: option(WebsocketHandler.t('ctx, 'a))=?,
       ~isSSL=false,
       (),
     ) => {
@@ -29,9 +28,8 @@ let make =
     };
 
   let createWsApp = app =>
-    switch (wsHandlers) {
-    | Some(handlers) =>
-      app |> WebsocketHandler.makeApp(handlers, ~config=?wsConfig)
+    switch (wsHandler) {
+    | Some(handler) => app |> WebsocketHandler.makeApp(handler)
     | None => app
     };
 

@@ -5,26 +5,16 @@ type t('a) = {
 and topicT = string
 and messageT('a) = 'a;
 
-let make = (namespace, ws) => {
-  publish: (path, rawMessage) => {
+let make = ws => {
+  publish: (topic, rawMessage) => {
     let message = Js.Json.stringifyAny(rawMessage);
-    let fullPath =
-      switch (namespace) {
-      | "" => path
-      | str => namespace ++ "/" ++ str
-      };
     switch (message) {
-    | Some(msg) => ws |> Websocket.publish2(fullPath, msg)
+    | Some(msg) => ws |> Websocket.publish2(topic, msg)
     | None => Js.log("invalid message")
     };
   },
   subscribe: topic => {
-    let topicPath =
-      switch (namespace) {
-      | "" => topic
-      | str => namespace ++ "/" ++ str
-      };
-    ws |> Websocket.subscribe(topicPath);
+    ws |> Websocket.subscribe(topic);
   },
 };
 

@@ -8,14 +8,14 @@ let rootController = ({route, res, pubsub}) => {
   switch (route) {
   | Get([]) => res |> sendJson({message: "hello world"})
   | Get(["publish"]) =>
-    pubsub.publish("hello", {message: "send ws"});
+    pubsub.publish("", {message: "send ws"});
     res |> sendJson({message: "send ws"});
   | _ => res |> sendJson({message: "Not found"})
   };
 };
 
 //
-let userController = ({route, res, body}) => {
+let userController = ({route, res}) => {
   switch (route) {
   | Get([]) => res |> sendJson({message: "hello user"})
   | Get([userId]) => res |> sendJson({message: "hello " ++ userId})
@@ -28,12 +28,12 @@ let httpHandlers = [("user", userController), ("", rootController)];
 [@bs.deriving abstract]
 type upgradeData = {token: option(string)};
 
-let rootWebsocketHandler =
+let wsHandler =
   WebsocketHandler.make(
     ~onOpen=
       ({path, pubsub}) => {
         Js.log(path);
-        pubsub.subscribe("/");
+        pubsub.subscribe("");
         ();
       },
     ~onMessage=
@@ -47,6 +47,4 @@ let rootWebsocketHandler =
     (),
   );
 
-let wsHandlers = [("", rootWebsocketHandler)];
-
-App.make(~port=3030, ~httpHandlers, ~wsHandlers, ());
+App.make(~port=3030, ~httpHandlers, ~wsHandler, ());

@@ -7,6 +7,7 @@ type handlerT('a) = {
   query: Js.Json.t,
   body: Body.t,
   pubsub: PubSub.t('a),
+  namespace: string,
 };
 
 type namespaceT = string;
@@ -71,7 +72,7 @@ let makeApp = (handlers: list(t('a)), app: Uws.t) => {
 
        let route = Route.make(~method, ~rawPath, ~rawNamespace);
        let handlerFromBody = body =>
-         handler({route, req, res, body, query, pubsub});
+         handler({route, req, res, body, query, pubsub, namespace});
 
        switch (method) {
        | Get
