@@ -1,13 +1,31 @@
-type t = {
-  publish: (topicT, messageT) => unit,
-  subscribe: (topicT, Websocket.t) => unit,
+type t('a) = {
+  publish: (topicT, messageT('a)) => unit,
+  subscribe: topicT => unit,
 }
 and topicT = string
-and messageT = string;
+and messageT('a) = 'a;
 
-let make = (~publish=(_, _) => (), ~subscribe=(_, _) => (), ()) => {
-  let pubsub = {publish, subscribe};
-  pubsub;
+let make = (namespace, ws) => {
+  publish: (path, rawMessage) => {
+    let message = Js.Json.stringifyAny(rawMessage);
+    let fullPath =
+      switch (namespace) {
+      | "" => path
+      | str => namespace ++ "/" ++ str
+      };
+    switch (message) {
+    | Some(msg) => ws |> Websocket.publish2(fullPath, msg)
+    | None => Js.log("invalid message")
+    };
+  },
+  subscribe: topic => {
+    let topicPath =
+      switch (namespace) {
+      | "" => topic
+      | str => namespace ++ "/" ++ str
+      };
+    ws |> Websocket.subscribe(topicPath);
+  },
 };
 
 module EventEmitter = {
@@ -19,7 +37,7 @@ module EventEmitter = {
 
 let fromEventEmitter = (e: EventEmitter.t) => {
   let publish = (topic, message) => e |> EventEmitter.emit(topic, message);
-  let subscribe = (topic, ws) => {
+  let subscribe = topic => {
     e |> EventEmitter.on(topic, () => ());
   };
   let pubsub = {publish, subscribe};

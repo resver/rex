@@ -81,4 +81,4 @@ external getRemoteAddress: unit => arrayBufferT = "getRemoteAddress";
 [@bs.send.pipe: t] external cork: (unit => unit) => unit = "cork";
 
 [@bs.send.pipe: t]
-external upgrade: (Js.t('a), string, string, string, 'b) => unit = "upgrade";
+external upgrade: ('a, string, string, string, 'b) => unit = "upgrade";

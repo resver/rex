@@ -1,16 +1,18 @@
-type handlerT = {
+// type wsT('a) = {publish: (string, 'a) => unit};
+
+type handlerT('a) = {
   route: Route.t,
   req: Request.t,
   res: Response.t,
   query: Js.Json.t,
   body: Body.t,
-  // pubsub: PubSub.t,
+  pubsub: PubSub.t('a),
 };
 
 type namespaceT = string;
-type t = (namespaceT, handlerT => unit);
+type t('a) = (namespaceT, handlerT('a) => unit);
 
-let makeApp = (handlers: list(t), app: Uws.t) => {
+let makeApp = (handlers: list(t('a)), app: Uws.t) => {
   app
   |> Uws.any("/*", (res, req) => {
        let rawPath = req |> Request.getUrl();
@@ -22,17 +24,55 @@ let makeApp = (handlers: list(t), app: Uws.t) => {
        // pick one handler from list of handlers
        // by check prefix of path == namespace
        let (rawNamespace, handler) =
-         handlers
-         |> List.find(((rawNamespace, _): t) => {
-              let normalizedPath = Path.(rawPath |> removePreceeding);
+         try(
+           handlers
+           |> List.find(((rawNamespace, _): t('a)) => {
+                let normalizedPath =
+                  Path.(rawPath |> removePreceeding |> removeTrailing);
 
-              let normalizedNamespace =
-                Path.(rawNamespace |> removePreceeding);
-              normalizedPath |> Js.String.startsWith(normalizedNamespace);
-            });
+                let normalizedNamespace =
+                  Path.(rawNamespace |> removePreceeding |> removeTrailing);
+
+                let found =
+                  switch (normalizedNamespace, normalizedPath) {
+                  | ("", _) => true
+                  | (namespace, path) =>
+                    path == namespace
+                    || path
+                    |> Js.String.startsWith(namespace ++ "/")
+                  };
+                found;
+              })
+         ) {
+         | Not_found => ("", (_ => ()))
+         };
+
+       let namespace =
+         Path.(rawNamespace |> removePreceeding |> removeTrailing);
+
+       let pubsub =
+         PubSub.{
+           publish: (path, rawMessage) => {
+             let message = Js.Json.stringifyAny(rawMessage);
+             let fullPath =
+               switch (namespace) {
+               | "" => path
+               | str => namespace ++ "/" ++ str
+               };
+             switch (message) {
+             | Some(msg) => app |> Uws.publish2(fullPath, msg)
+             | None => Js.log("invalid message")
+             };
+           },
+           subscribe: _ => {
+             Js.log("Subscribe is not available in HTTP");
+           },
+         };
 
        let route = Route.make(~method, ~rawPath, ~rawNamespace);
-       let handlerFromBody = body => handler({route, req, res, body, query});
+       let handlerFromBody = body =>
+         handler({route, req, res, body, query, pubsub});
+
        switch (method) {
        | Get
        | Head => handlerFromBody(Empty)

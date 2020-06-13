@@ -12,6 +12,32 @@ let removeTrailing = str =>
   | _ => str
   };
 
+let toString =
+  fun
+  | [] => ""
+  | pathList => pathList |> Array.of_list |> Js.Array.joinWith("/");
+
+let makeString = (~rawPath, ~rawNamespace) =>
+  switch (rawPath) {
+  | ""
+  | "/" => ""
+  | raw =>
+    // remove preceeding "/" and trailing
+    let normalizedPath = raw |> removePreceeding |> removeTrailing;
+    let normalizedNamespace =
+      rawNamespace |> removePreceeding |> removeTrailing;
+
+    // if begin with namespace, remove namespace
+    let removedPath =
+      normalizedPath |> Js.String.startsWith(normalizedNamespace)
+        ? normalizedPath
+          |> Js.String.sliceToEnd(~from=String.length(normalizedNamespace))
+        : normalizedPath;
+
+    // remove preceeding again, convert to list
+    removedPath |> removePreceeding;
+  };
+
 let make = (~rawPath, ~rawNamespace) =>
   switch (rawPath) {
   | ""

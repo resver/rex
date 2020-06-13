@@ -33,7 +33,7 @@ type codeT = int;
 [@bs.send.pipe: t] external pingBuffer1: arrayBufferT => t = "ping";
 
 // Subscribe to a topic in MQTT syntax
-[@bs.send.pipe: t] external subscribe: string => t = "subscribe";
+[@bs.send.pipe: t] external subscribe: string => unit = "subscribe";
 [@bs.send.pipe: t] external subscribeBuffer: arrayBufferT => t = "subscribe";
 
 // Unsubscribe from a topic.
