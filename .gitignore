@@ -9,3 +9,5 @@ lib/bs
 node_modules
 
 *.bs.js
+
+coverage

@@ -59,3 +59,42 @@ describe("Make path", () => {
     |> toEqual(["test", "test2"])
   );
 });
+
+describe("Make string", () => {
+  let rawNamespace = "";
+  test("empty string", () =>
+    expect(makeString(~rawPath="", ~rawNamespace)) |> toEqual("/")
+  );
+  test("just single char: /", () =>
+    expect(makeString(~rawPath="/", ~rawNamespace)) |> toEqual("/")
+  );
+  test("with preceeding /", () =>
+    expect(makeString(~rawPath="/test", ~rawNamespace)) |> toEqual("/test")
+  );
+  test("with trailing /", () => {
+    expect(makeString(~rawPath="test/", ~rawNamespace)) |> toEqual("/test")
+  });
+  test("with preceeding and trailing /", () =>
+    expect(makeString(~rawPath="/test/", ~rawNamespace)) |> toEqual("/test")
+  );
+  test("with preceeding and trailing /, multilevel", () =>
+    expect(makeString(~rawPath="/test/test2", ~rawNamespace))
+    |> toEqual("/test/test2")
+  );
+  test("with multilevel and namespace", () =>
+    expect(makeString(~rawPath="hello/test/test2", ~rawNamespace="/hello"))
+    |> toEqual("/test/test2")
+  );
+});
+
+describe("Path to string", () => {
+  test("empty list", () =>
+    expect(toString([])) |> toEqual("/")
+  );
+  test("list length 1", () =>
+    expect(toString(["test"])) |> toEqual("/test")
+  );
+  test("list length 2", () =>
+    expect(toString(["test", "test2"])) |> toEqual("/test/test2")
+  );
+});

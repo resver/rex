@@ -6,8 +6,8 @@ type resDataT = {message: string};
 //
 let rootController = ({route, res}) => {
   switch (route) {
-  | Get([]) => res |> sendJson({message: "hello world"})
-  | _ => res |> sendJson({message: "Not found"})
+  | Get([]) => res |> send("hello world")
+  | _ => res |> send("Not found")
   };
 };
 

@@ -14,13 +14,13 @@ let removeTrailing = str =>
 
 let toString =
   fun
-  | [] => ""
-  | pathList => pathList |> Array.of_list |> Js.Array.joinWith("/");
+  | [] => "/"
+  | pathList => "/" ++ (pathList |> Array.of_list |> Js.Array.joinWith("/"));
 
 let makeString = (~rawPath, ~rawNamespace) =>
   switch (rawPath) {
   | ""
-  | "/" => ""
+  | "/" => "/"
   | raw =>
     // remove preceeding "/" and trailing
     let normalizedPath = raw |> removePreceeding |> removeTrailing;
@@ -34,8 +34,8 @@ let makeString = (~rawPath, ~rawNamespace) =>
           |> Js.String.sliceToEnd(~from=String.length(normalizedNamespace))
         : normalizedPath;
 
-    // remove preceeding again, convert to list
-    removedPath |> removePreceeding;
+    // remove preceeding again,
+    "/" ++ (removedPath |> removePreceeding);
   };
 
 let make = (~rawPath, ~rawNamespace) =>
