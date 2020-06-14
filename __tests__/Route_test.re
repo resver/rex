@@ -4,9 +4,7 @@ open Expect;
 open Route;
 
 describe("Make route", () => {
-  test(
-    "Get, Post, Put, Patch, Options, Head, Trace, Connect, unknown to path /",
-    () => {
+  test("make", () => {
     let rawPath = "/";
     let rawNamespace = "";
     expect([

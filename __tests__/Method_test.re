@@ -2,8 +2,8 @@ open Jest;
 open Method;
 open Expect;
 
-describe("Make", () => {
-  test("empty string", () =>
+describe("Method", () => {
+  test("make", () =>
     expect([
       make("get"),
       make("post"),
