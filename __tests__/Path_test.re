@@ -45,8 +45,7 @@ describe("Make path", () => {
     expect(make(~rawPath="/test", ~rawNamespace)) |> toEqual(["test"])
   );
   test("with trailing /", () => {
-    Js.log(make(~rawPath="test/", ~rawNamespace));
-    expect(make(~rawPath="test/", ~rawNamespace)) |> toEqual(["test"]);
+    expect(make(~rawPath="test/", ~rawNamespace)) |> toEqual(["test"])
   });
   test("with preceeding and trailing /", () =>
     expect(make(~rawPath="/test/", ~rawNamespace)) |> toEqual(["test"])

@@ -12,6 +12,6 @@ let rootController = ({route, res}) => {
 };
 
 let rootNamespace = "";
-let httpHandlers = [(rootNamespace, rootController)];
+let handlers = [(rootNamespace, rootController)];
 
-App.make(~port=3000, ~httpHandlers, ());
+App.make(~port=3000, ~handlers, ());

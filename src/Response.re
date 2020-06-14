@@ -27,6 +27,8 @@ let sendJson = (data, res) => {
   ();
 };
 
+// TODO: make this async
+// https://github.com/uNetworking/uWebSockets.js/blob/master/examples/VideoStreamer.js
 let sendFile = (filePath, res) => {
   let isFileExist = Node.Fs.existsSync(filePath);
   let toArrayBuffer: 'a => arrayBufferT = [%bs.raw
@@ -37,10 +39,9 @@ let sendFile = (filePath, res) => {
     |}
   ];
 
-  let file = Node.Fs.readFileSync(filePath) |> toArrayBuffer;
-
   isFileExist
     ? {
+      let file = Node.Fs.readFileSync(filePath) |> toArrayBuffer;
       res |> endBuffer1(file);
     }
     : res
