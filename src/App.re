@@ -6,9 +6,10 @@ let listenWithHost = Uws.listenWithHost;
 
 let make =
     (
-      ~port=3030,
+      ~port=3000,
       ~onListen=_ => (),
       ~config=?,
+      ~onBeforeHttpHandlers=?,
       ~httpHandlers: option(list(HttpHandler.t('a)))=?,
       ~wsHandler: option(WebsocketHandler.t('ctx, 'a))=?,
       ~isSSL=false,
@@ -23,7 +24,8 @@ let make =
 
   let createHttpApp = app =>
     switch (httpHandlers) {
-    | Some(handlers) => app |> HttpHandler.makeApp(handlers)
+    | Some(handlers) =>
+      app |> HttpHandler.makeApp(handlers, onBeforeHttpHandlers)
     | None => app
     };
 

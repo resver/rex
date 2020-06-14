@@ -31,10 +31,10 @@ let sendFile = (filePath, res) => {
   let isFileExist = Node.Fs.existsSync(filePath);
   let toArrayBuffer: 'a => arrayBufferT = [%bs.raw
     {|
-            function toArrayBuffer(buffer) {
-    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-  }
-            |}
+      function toArrayBuffer(buffer) {
+        return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+      }
+    |}
   ];
 
   let file = Node.Fs.readFileSync(filePath) |> toArrayBuffer;

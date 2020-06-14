@@ -13,14 +13,23 @@ type handlerT('a) = {
 type namespaceT = string;
 type t('a) = (namespaceT, handlerT('a) => unit);
 
-let makeApp = (handlers: list(t('a)), app: Uws.t) => {
+let makeApp =
+    (
+      handlers: list(t('a)),
+      onBeforeHttpHandlers: option((Request.t, Response.t) => Response.t),
+      app: Uws.t,
+    ) => {
   app
   |> Uws.any("/*", (res, req) => {
        let rawPath = req |> Request.getUrl();
-
        let method = req |> Request.getMethod() |> Method.make;
-
        let query = req |> Request.getQuery() |> Qs.parse;
+
+       let modifiedRes =
+         switch (onBeforeHttpHandlers) {
+         | Some(onBeforeHandler) => onBeforeHandler(req, res)
+         | None => res
+         };
 
        // pick one handler from list of handlers
        // by check prefix of path == namespace
@@ -72,7 +81,15 @@ let makeApp = (handlers: list(t('a)), app: Uws.t) => {
 
        let route = Route.make(~method, ~rawPath, ~rawNamespace);
        let handlerFromBody = body =>
-         handler({route, req, res, body, query, pubsub, namespace});
+         handler({
+           route,
+           req,
+           res: modifiedRes,
+           body,
+           query,
+           pubsub,
+           namespace,
+         });
 
        switch (method) {
        | Get
