@@ -95,7 +95,7 @@ let makeApp =
        | Get
        | Head => handlerFromBody(Empty)
        | _ =>
-         let contentType = req |> Request.getHeader("content-type");
+         let contentType = req |> Request.getContentType |> List.hd;
          res
          |> Body.getFromBuffer(
               body => {handlerFromBody(Body.make(body, contentType))},

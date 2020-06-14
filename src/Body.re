@@ -45,6 +45,7 @@ let getFromBuffer:
 
 let make = (body, contentType) => {
   switch (contentType) {
+  | "application/javascript"
   | "application/json" =>
     try(
       Json(
