@@ -2,7 +2,7 @@ open Jest;
 open Authorization;
 open Expect;
 
-describe("Authorization", () => {
+describe("Authorization.make", () => {
   test("make from Bearer", () =>
     expect(make("Bearer token123")) |> toEqual(Bearer("token123"))
   );
@@ -20,5 +20,8 @@ describe("Authorization", () => {
   );
   test("make no space", () =>
     expect(make("asdfasdf")) |> toEqual(Raw("asdfasdf"))
+  );
+  test("make empty", () =>
+    expect(make("")) |> toEqual(Raw(""))
   );
 });
