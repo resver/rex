@@ -8,7 +8,7 @@ type t =
   | Head(Path.t)
   | Connect(Path.t)
   | Trace(Path.t)
-  | Any(Path.t);
+  | Unknown(Path.t, string);
 
 let make = (~method: Method.t, ~rawPath, ~rawNamespace) => {
   let pathList = Path.make(~rawPath, ~rawNamespace);
@@ -23,6 +23,6 @@ let make = (~method: Method.t, ~rawPath, ~rawNamespace) => {
   | Head => Head(pathList)
   | Connect => Connect(pathList)
   | Trace => Trace(pathList)
-  | Unknown(_) => Any(pathList)
+  | Unknown(method) => Unknown(pathList, method)
   };
 };
