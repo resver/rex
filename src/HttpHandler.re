@@ -17,6 +17,7 @@ let makeApp =
     (
       handlers: list(t('a)),
       onBeforeHttpHandlers: option((Request.t, Response.t) => Response.t),
+      pubsubAdapter,
       app: Uws.t,
     ) => {
   app
@@ -60,24 +61,7 @@ let makeApp =
        let namespace =
          Path.(rawNamespace |> removePreceeding |> removeTrailing);
 
-       let pubsub =
-         PubSub.{
-           publish: (path, rawMessage) => {
-             let message = Js.Json.stringifyAny(rawMessage);
-             let fullPath =
-               switch (namespace) {
-               | "" => path
-               | str => namespace ++ "/" ++ str
-               };
-             switch (message) {
-             | Some(msg) => app |> Uws.publish2(fullPath, msg)
-             | None => Js.log("invalid message")
-             };
-           },
-           subscribe: _ => {
-             Js.log("Subscribe is not available in HTTP");
-           },
-         };
+       let pubsub = app |> PubSub.makeForHttp(pubsubAdapter);
 
        let route = Route.make(~method, ~rawPath, ~rawNamespace);
        let handlerFromBody = body =>

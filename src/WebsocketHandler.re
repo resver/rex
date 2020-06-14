@@ -49,7 +49,7 @@ let make = (~onOpen=?, ~config=?, ~onMessage=?, ()) => {
   handler;
 };
 
-let makeApp = (handler, app) => {
+let makeApp = (handler, pubsubAdapter, app) => {
   let config = handler.config;
   let wsBehavior =
     Websocket.makeWebsocketBehavior(
@@ -85,7 +85,7 @@ let makeApp = (handler, app) => {
             let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace="");
             let query = rawQuery |? "" |> Qs.parse;
 
-            let pubsub = ws |> PubSub.make;
+            let pubsub = ws |> PubSub.make(pubsubAdapter);
 
             onOpen({path, query, pubsub});
           | None => ()
@@ -103,7 +103,7 @@ let makeApp = (handler, app) => {
             let query = rawQuery |? "" |> Qs.parse;
             let body = Body.make(message, "application/json");
 
-            let pubsub = ws |> PubSub.make;
+            let pubsub = ws |> PubSub.make(pubsubAdapter);
 
             onMessage({body, path, query, pubsub});
           | None => ()
