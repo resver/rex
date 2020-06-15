@@ -14,7 +14,6 @@ let makeApp =
     (
       handler: t('a) => unit,
       onBeforeHttpHandler: option((Request.t, Response.t) => Response.t),
-      pubsubAdapter,
       app: Uws.t,
     ) => {
   app
@@ -29,7 +28,7 @@ let makeApp =
          | None => res
          };
 
-       let pubsub = app |> PubSub.makeForHttp(pubsubAdapter);
+       let pubsub = app |> PubSub.makeForHttp;
 
        let handlerFromBody = body =>
          handler({req, res: modifiedRes, body, query, pubsub, verb, path});

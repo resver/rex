@@ -47,7 +47,7 @@ let make = (~onOpen=?, ~config=?, ~onMessage=?, ()) => {
   handler;
 };
 
-let makeApp = (handler, pubsubAdapter, app) => {
+let makeApp = (handler, app) => {
   let config = handler.config;
   let wsBehavior =
     Websocket.makeWebsocketBehavior(
@@ -83,13 +83,7 @@ let makeApp = (handler, pubsubAdapter, app) => {
             let path = Path.make(rawPath |? "");
             let query = rawQuery |? "" |> Qs.parse;
 
-            let pubsub = ws |> PubSub.make(pubsubAdapter);
-
-            switch (pubsubAdapter) {
-            | Some(adapter) =>
-              Some(ws) |> adapter.onWsOpen({path, query, pubsub, ws})
-            | _ => ()
-            };
+            let pubsub = ws |> PubSub.make;
 
             onOpen({path, query, pubsub});
           | None => ()
@@ -101,15 +95,14 @@ let makeApp = (handler, pubsubAdapter, app) => {
           let rawPath = ws |> Websocket.getRawPath;
           let rawQuery = ws |> Websocket.getRawQuery;
 
-          switch (handler.onMessage, pubsubAdapter) {
-          | (Some(onMessage), None) =>
+          switch (handler.onMessage) {
+          | Some(onMessage) =>
             let path = Path.make(rawPath |? "");
             let query = rawQuery |? "" |> Qs.parse;
             let body = Body.make(message, "application/json");
-            let pubsub = ws |> PubSub.make(pubsubAdapter);
+            let pubsub = ws |> PubSub.make;
 
             onMessage({body, path, query, pubsub});
-          | (Some(_), Some(_)) => ()
           | _ => ()
           };
         },

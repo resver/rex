@@ -9,7 +9,6 @@ let make =
       ~port=3000,
       ~onListen=_ => (),
       ~config=?,
-      ~pubSubAdapter=?,
       ~onBeforeHandler=?,
       ~handler: option(HttpHandler.t('a) => unit)=?,
       ~wsHandler: option(WebsocketHandler.t('ctx, 'a))=?,
@@ -25,15 +24,13 @@ let make =
 
   let createHttpApp = app =>
     switch (handler) {
-    | Some(handler) =>
-      app |> HttpHandler.makeApp(handler, onBeforeHandler, pubSubAdapter)
+    | Some(handler) => app |> HttpHandler.makeApp(handler, onBeforeHandler)
     | None => app
     };
 
   let createWsApp = app =>
     switch (wsHandler) {
-    | Some(handler) =>
-      app |> WebsocketHandler.makeApp(handler, pubSubAdapter)
+    | Some(handler) => app |> WebsocketHandler.makeApp(handler)
     | None => app
     };
 
