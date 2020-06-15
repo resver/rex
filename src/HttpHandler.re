@@ -2,7 +2,7 @@
 
 type t('a) = {
   path: Path.t,
-  method: Method.t,
+  verb: Verb.t,
   req: Request.t,
   res: Response.t,
   query: Js.Json.t,
@@ -20,7 +20,7 @@ let makeApp =
   app
   |> Uws.any("/*", (res, req) => {
        let path = req |> Request.getUrl() |> Path.make;
-       let method = req |> Request.getMethod() |> Method.make;
+       let verb = req |> Request.getVerb() |> Verb.make;
        let query = req |> Request.getQuery() |> Qs.parse;
 
        let modifiedRes =
@@ -32,9 +32,9 @@ let makeApp =
        let pubsub = app |> PubSub.makeForHttp(pubsubAdapter);
 
        let handlerFromBody = body =>
-         handler({req, res: modifiedRes, body, query, pubsub, method, path});
+         handler({req, res: modifiedRes, body, query, pubsub, verb, path});
 
-       switch (method) {
+       switch (verb) {
        | Get
        | Head => handlerFromBody(Empty)
        | _ =>

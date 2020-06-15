@@ -56,12 +56,12 @@ describe("Make path", () => {
 
 describe("Path to string", () => {
   test("empty list", () =>
-    expect(toString([])) |> toEqual("/")
+    expect(show([])) |> toEqual("/")
   );
   test("list length 1", () =>
-    expect(toString(["test"])) |> toEqual("/test")
+    expect(show(["test"])) |> toEqual("/test")
   );
   test("list length 2", () =>
-    expect(toString(["test", "test2"])) |> toEqual("/test/test2")
+    expect(show(["test", "test2"])) |> toEqual("/test/test2")
   );
 });

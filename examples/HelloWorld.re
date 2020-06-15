@@ -1,10 +1,12 @@
 open Response;
 open HttpHandler;
 
+open Verb;
+
 //
-let handler = ({method, path, res}) => {
-  switch (method, path) {
-  | (Method.Get, []) => res |> send("hello world")
+let handler = ({verb, path, res}) => {
+  switch (verb, path) {
+  | (Get, []) => res |> send("hello world")
   | _ => res |> send("Not found")
   };
 };

@@ -1,5 +1,5 @@
 open Jest;
-open Method;
+open Verb;
 open Expect;
 
 describe("Method.make", () => {

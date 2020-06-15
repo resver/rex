@@ -12,7 +12,7 @@ let removeTrailing = str =>
   | _ => str
   };
 
-let toString =
+let show =
   fun
   | [] => "/"
   | pathList => "/" ++ (pathList |> Array.of_list |> Js.Array.joinWith("/"));

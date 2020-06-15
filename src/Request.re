@@ -1,5 +1,9 @@
 include Uws_Request;
 
+let getVerb = req => {
+  req |> getMethod;
+};
+
 let getContentType = req => {
   let rawContentType = req |> getHeader("content-type");
   rawContentType |> Js.String.split("; ") |> Array.to_list;
