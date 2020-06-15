@@ -1,79 +1,38 @@
 // type wsT('a) = {publish: (string, 'a) => unit};
 
-type handlerT('a) = {
-  route: Route.t,
+type t('a) = {
+  path: Path.t,
+  method: Method.t,
   req: Request.t,
   res: Response.t,
   query: Js.Json.t,
   body: Body.t,
   pubsub: PubSub.t('a),
-  namespace: string,
 };
-
-type namespaceT = string;
-type t('a) = (namespaceT, handlerT('a) => unit);
 
 let makeApp =
     (
-      handlers: list(t('a)),
-      onBeforeHttpHandlers: option((Request.t, Response.t) => Response.t),
+      handler: t('a) => unit,
+      onBeforeHttpHandler: option((Request.t, Response.t) => Response.t),
       pubsubAdapter,
       app: Uws.t,
     ) => {
   app
   |> Uws.any("/*", (res, req) => {
-       let rawPath = req |> Request.getUrl();
+       let path = req |> Request.getUrl() |> Path.make;
        let method = req |> Request.getMethod() |> Method.make;
        let query = req |> Request.getQuery() |> Qs.parse;
 
        let modifiedRes =
-         switch (onBeforeHttpHandlers) {
+         switch (onBeforeHttpHandler) {
          | Some(onBeforeHandler) => onBeforeHandler(req, res)
          | None => res
          };
 
-       // pick one handler from list of handlers
-       // by check prefix of path == namespace
-       let (rawNamespace, handler) =
-         try(
-           handlers
-           |> List.find(((rawNamespace, _): t('a)) => {
-                let normalizedPath =
-                  Path.(rawPath |> removePreceeding |> removeTrailing);
-
-                let normalizedNamespace =
-                  Path.(rawNamespace |> removePreceeding |> removeTrailing);
-
-                let found =
-                  switch (normalizedNamespace, normalizedPath) {
-                  | ("", _) => true
-                  | (namespace, path) =>
-                    path == namespace
-                    || path
-                    |> Js.String.startsWith(namespace ++ "/")
-                  };
-                found;
-              })
-         ) {
-         | Not_found => ("", (_ => ()))
-         };
-
-       let namespace =
-         Path.(rawNamespace |> removePreceeding |> removeTrailing);
-
        let pubsub = app |> PubSub.makeForHttp(pubsubAdapter);
 
-       let route = Route.make(~method, ~rawPath, ~rawNamespace);
        let handlerFromBody = body =>
-         handler({
-           route,
-           req,
-           res: modifiedRes,
-           body,
-           query,
-           pubsub,
-           namespace,
-         });
+         handler({req, res: modifiedRes, body, query, pubsub, method, path});
 
        switch (method) {
        | Get

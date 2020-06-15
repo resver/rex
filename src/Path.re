@@ -17,44 +17,14 @@ let toString =
   | [] => "/"
   | pathList => "/" ++ (pathList |> Array.of_list |> Js.Array.joinWith("/"));
 
-let makeString = (~rawPath, ~rawNamespace) =>
-  switch (rawPath) {
-  | ""
-  | "/" => "/"
-  | raw =>
-    // remove preceeding "/" and trailing
-    let normalizedPath = raw |> removePreceeding |> removeTrailing;
-    let normalizedNamespace =
-      rawNamespace |> removePreceeding |> removeTrailing;
-
-    // if begin with namespace, remove namespace
-    let removedPath =
-      normalizedPath |> Js.String.startsWith(normalizedNamespace)
-        ? normalizedPath
-          |> Js.String.sliceToEnd(~from=String.length(normalizedNamespace))
-        : normalizedPath;
-
-    // remove preceeding again,
-    "/" ++ (removedPath |> removePreceeding);
-  };
-
-let make = (~rawPath, ~rawNamespace) =>
+let make = rawPath =>
   switch (rawPath) {
   | ""
   | "/" => []
   | raw =>
     // remove preceeding "/" and trailing
     let normalizedPath = raw |> removePreceeding |> removeTrailing;
-    let normalizedNamespace =
-      rawNamespace |> removePreceeding |> removeTrailing;
-
-    // if begin with namespace, remove namespace
-    let removedPath =
-      normalizedPath |> Js.String.startsWith(normalizedNamespace)
-        ? normalizedPath
-          |> Js.String.sliceToEnd(~from=String.length(normalizedNamespace))
-        : normalizedPath;
 
     // remove preceeding again, convert to list
-    removedPath |> removePreceeding |> Js.String.split("/") |> Array.to_list;
+    normalizedPath |> Js.String.split("/") |> Array.to_list;
   };

@@ -34,56 +34,23 @@ describe("Remove trailing /", () => {
 });
 
 describe("Make path", () => {
-  let rawNamespace = "";
   test("empty string", () =>
-    expect(make(~rawPath="", ~rawNamespace)) |> toEqual([])
+    expect(make("")) |> toEqual([])
   );
   test("just single char: /", () =>
-    expect(make(~rawPath="/", ~rawNamespace)) |> toEqual([])
+    expect(make("/")) |> toEqual([])
   );
   test("with preceeding /", () =>
-    expect(make(~rawPath="/test", ~rawNamespace)) |> toEqual(["test"])
+    expect(make("/test")) |> toEqual(["test"])
   );
   test("with trailing /", () => {
-    expect(make(~rawPath="test/", ~rawNamespace)) |> toEqual(["test"])
+    expect(make("test/")) |> toEqual(["test"])
   });
   test("with preceeding and trailing /", () =>
-    expect(make(~rawPath="/test/", ~rawNamespace)) |> toEqual(["test"])
+    expect(make("/test/")) |> toEqual(["test"])
   );
   test("with preceeding and trailing /, multilevel", () =>
-    expect(make(~rawPath="/test/test2", ~rawNamespace))
-    |> toEqual(["test", "test2"])
-  );
-  test("with multilevel and namespace", () =>
-    expect(make(~rawPath="hello/test/test2", ~rawNamespace="/hello"))
-    |> toEqual(["test", "test2"])
-  );
-});
-
-describe("Make string", () => {
-  let rawNamespace = "";
-  test("empty string", () =>
-    expect(makeString(~rawPath="", ~rawNamespace)) |> toEqual("/")
-  );
-  test("just single char: /", () =>
-    expect(makeString(~rawPath="/", ~rawNamespace)) |> toEqual("/")
-  );
-  test("with preceeding /", () =>
-    expect(makeString(~rawPath="/test", ~rawNamespace)) |> toEqual("/test")
-  );
-  test("with trailing /", () => {
-    expect(makeString(~rawPath="test/", ~rawNamespace)) |> toEqual("/test")
-  });
-  test("with preceeding and trailing /", () =>
-    expect(makeString(~rawPath="/test/", ~rawNamespace)) |> toEqual("/test")
-  );
-  test("with preceeding and trailing /, multilevel", () =>
-    expect(makeString(~rawPath="/test/test2", ~rawNamespace))
-    |> toEqual("/test/test2")
-  );
-  test("with multilevel and namespace", () =>
-    expect(makeString(~rawPath="hello/test/test2", ~rawNamespace="/hello"))
-    |> toEqual("/test/test2")
+    expect(make("/test/test2")) |> toEqual(["test", "test2"])
   );
 });
 

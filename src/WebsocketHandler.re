@@ -30,8 +30,6 @@ let (<$>) = Belt.Option.map;
 let (>>=) = Belt.Option.flatMap;
 let (|?) = Belt.Option.getWithDefault;
 
-let emitter = PubSub.EventEmitter.make();
-
 let makeConfig =
     (
       ~maxPayloadLength=?,
@@ -82,10 +80,16 @@ let makeApp = (handler, pubsubAdapter, app) => {
 
           switch (handler.onOpen) {
           | Some(onOpen) =>
-            let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace="");
+            let path = Path.make(rawPath |? "");
             let query = rawQuery |? "" |> Qs.parse;
 
             let pubsub = ws |> PubSub.make(pubsubAdapter);
+
+            switch (pubsubAdapter) {
+            | Some(adapter) =>
+              Some(ws) |> adapter.onWsOpen({path, query, pubsub, ws})
+            | _ => ()
+            };
 
             onOpen({path, query, pubsub});
           | None => ()
@@ -97,16 +101,16 @@ let makeApp = (handler, pubsubAdapter, app) => {
           let rawPath = ws |> Websocket.getRawPath;
           let rawQuery = ws |> Websocket.getRawQuery;
 
-          switch (handler.onMessage) {
-          | Some(onMessage) =>
-            let path = Path.make(~rawPath=rawPath |? "", ~rawNamespace="");
+          switch (handler.onMessage, pubsubAdapter) {
+          | (Some(onMessage), None) =>
+            let path = Path.make(rawPath |? "");
             let query = rawQuery |? "" |> Qs.parse;
             let body = Body.make(message, "application/json");
-
             let pubsub = ws |> PubSub.make(pubsubAdapter);
 
             onMessage({body, path, query, pubsub});
-          | None => ()
+          | (Some(_), Some(_)) => ()
+          | _ => ()
           };
         },
       (),
