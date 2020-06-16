@@ -30,31 +30,20 @@ let sendJson = (data, res) => {
 // TODO: make this async
 // https://github.com/uNetworking/uWebSockets.js/blob/master/examples/VideoStreamer.js
 
+[@bs.module "mime-types"] external mimeLookup: string => string = "lookup";
+
 let sendFile = (filePath, res) => {
   let isFileExist = Node.Fs.existsSync(filePath);
-  let toArrayBuffer: 'a => arrayBufferT = [%bs.raw
-    {|
-      function toArrayBuffer(buffer) {
-        return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-      }
-    |}
-  ];
-
-  Js.log(filePath);
-  Js.log(isFileExist);
 
   isFileExist
     ? {
-      let file = Node.Fs.readFileSync(filePath, `binary);
-      let totalSize: string => int = [%bs.raw
-        {| function getTotalSize(fileName) {
-        const fs = require('fs');
-        fs.statSync(fileName).size;
-      } |}
-      ];
-      res |> end1(file);
+      let file =
+        try(Node.Fs.readFileSync(filePath, `binary)) {
+        | _ => "Error reading file, or file is not exist" ++ filePath
+        };
+      res |> setContentType(mimeLookup(filePath)) |> end1(file);
     }
     : res
-      |> setStatus((500, "Internal Server Error"))
+      |> setStatus((404, "Not Found"))
       |> send("File is not exist: " ++ filePath);
 };
