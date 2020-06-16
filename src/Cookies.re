@@ -33,7 +33,7 @@ let get = (key, cookies) => {
   };
 };
 
-let toString = cookies => {
+let show = cookies => {
   cookies
   |> List.map(((k, v)) => {k ++ "=" ++ v})
   |> Array.of_list

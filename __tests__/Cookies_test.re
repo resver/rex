@@ -16,9 +16,9 @@ describe("Cookies.make", () => {
   );
 });
 
-describe("Cookies.toString", () => {
+describe("Cookies.show", () => {
   test("from list of tuple", () =>
-    expect(toString([("test", "value"), ("test2", "value2")]))
+    expect(show([("test", "value"), ("test2", "value2")]))
     |> toEqual("test=value; test2=value2")
   )
 });

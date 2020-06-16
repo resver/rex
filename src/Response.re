@@ -29,6 +29,7 @@ let sendJson = (data, res) => {
 
 // TODO: make this async
 // https://github.com/uNetworking/uWebSockets.js/blob/master/examples/VideoStreamer.js
+
 let sendFile = (filePath, res) => {
   let isFileExist = Node.Fs.existsSync(filePath);
   let toArrayBuffer: 'a => arrayBufferT = [%bs.raw
@@ -39,10 +40,19 @@ let sendFile = (filePath, res) => {
     |}
   ];
 
+  Js.log(filePath);
+  Js.log(isFileExist);
+
   isFileExist
     ? {
-      let file = Node.Fs.readFileSync(filePath) |> toArrayBuffer;
-      res |> endBuffer1(file);
+      let file = Node.Fs.readFileSync(filePath, `binary);
+      let totalSize: string => int = [%bs.raw
+        {| function getTotalSize(fileName) {
+        const fs = require('fs');
+        fs.statSync(fileName).size;
+      } |}
+      ];
+      res |> end1(file);
     }
     : res
       |> setStatus((500, "Internal Server Error"))
