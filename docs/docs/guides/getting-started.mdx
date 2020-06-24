@@ -1,0 +1,29 @@
+---
+id: getting-started
+title: Getting Started
+---
+
+This document aims to be a gentle introduction to the framework and its features.
+It is an elementary preface with examples and links to other parts of the documentation.
+Let's get start!
+
+## Install
+
+```sh
+npm install @resver/rex
+```
+
+## Your First Server
+
+```reason
+open Rex;
+
+let handler = HttpHandler.({verb, path, res}) => {
+  switch (verb, path) {
+  | (Verb.Get, []) => res |> Response.send("hello world")
+  | _ => res |> Response.send("Not found")
+  };
+};
+
+App.make(~port=3000, ~handler, ());
+```
