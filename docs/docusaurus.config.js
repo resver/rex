@@ -14,7 +14,7 @@ module.exports = {
       title: "Rex",
       logo: {
         alt: "My Site Logo",
-        src: "img/logo.svg",
+        src: "img/rex.png",
       },
       links: [
         {

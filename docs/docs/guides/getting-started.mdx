@@ -1,29 +1,69 @@
 ---
 id: getting-started
-title: Getting Started
+title: 🎉 Getting Started
 ---
 
 This document aims to be a gentle introduction to the framework and its features.
 It is an elementary preface with examples and links to other parts of the documentation.
 Let's get start!
 
-## Install
+## Installation
+
+Let's say that you've already has [Node.js](https://nodejs.org/en/) installed
+and already setup a
+[ReasonML](https://reasonml.github.io/docs/en/installation) project.
 
 ```sh
-npm install @resver/rex
+$ npm install  --save resver-rex
 ```
 
-## Your First Server
+then add it to `bsconfig.json`
+
+```json
+{
+  ...
+  "bs-dependencies": ["resver-rex"]
+  ...
+}
+```
+
+## Launch Server 🚀
 
 ```reason
+/* file: Server.re */
 open Rex;
 
 let handler = HttpHandler.({verb, path, res}) => {
   switch (verb, path) {
-  | (Verb.Get, []) => res |> Response.send("hello world")
+  | (Verb.Get, []) => res |> Response.send("Hello world!")
   | _ => res |> Response.send("Not found")
   };
 };
 
 App.make(~port=3000, ~handler, ());
+```
+
+Your code should be compiled to `Server.bs.js`, then run
+
+```
+$ node ./Server.bs.js
+```
+
+then the app should live at `http://localhost:3000`
+
+## Handler
+
+there is only one function that run them all.
+`~handler`.
+
+**Params:**
+
+```reason
+req: Request.t, // request object
+res: Response.t, // response object
+verb: Verb.t, // HTTP Methods for example GET, POST, etc.
+path: Path.t // list of string that separated by "/"
+query: Js.Json.t, // query string
+body: Body.t, // parsed body
+pubsub: PubSub.t('a) // publish/subscribe (used in websocket)
 ```

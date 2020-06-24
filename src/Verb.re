@@ -7,8 +7,7 @@ type t =
   | Options
   | Head
   | Trace
-  | Connect
-  | Unknown(string);
+  | Connect;
 
 let make =
   fun
@@ -21,4 +20,4 @@ let make =
   | "head" => Head
   | "connect" => Connect
   | "trace" => Trace
-  | str => Unknown(str);
+  | _ => Get;

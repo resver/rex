@@ -1,0 +1,48 @@
+---
+id: routing
+title: 🔀 Routing
+---
+
+## Pattern Matching
+
+Actually there is no built in router. But, you don't need routing library
+when you have [Pattern Matching](https://reasonml.org/docs/manual/latest/pattern-matching).
+
+```reason
+open Rex.Verb;
+open Rex.Response;
+
+let handler = Rex.HttpHandler.({verb, path, res}) => {
+  switch (verb, path) {
+  // GET "/"
+  | (Get, []) => res |> send("Hello world!")
+  // Get "/foo/bar"
+  | (Get, ["foo", "bar"]) => res |> send("Hello FooBar!")
+  // POST "/"
+  | (Post, []) => res |> send("Posting!")
+  // All Method "/secret"
+  | (_, ["secret"]) => res |> send("Accessing secret...")
+  // GET "/user/asuka" => "Username: asuka"
+  // GET "/user/misato" => "Username: misato"
+  | (Get, ["user", username]) => res |> send("Username: " ++ username)
+
+  // Namespace (nested), all path begin with "/blog"
+  | (_, ["blog", ...blogPath]) => {
+    switch (verb, blogPath) {
+    // GET "/blog" => "Blog home"
+    | (Get, []) => res |> send("Blog home")
+    // GET "/blog/article-1" => "article-1"
+    // GET "/blog/article-2" => "article-2"
+    | (Get, [article]) => res |> send(article)
+    | _ => res |> Response.send("Not found")
+    };
+  }
+  // other than that, respond with "Not found"
+  | _ => res |> Response.send("Not found")
+  };
+};
+
+Rex.App.make(~port=3000, ~handler, ());
+```
+
+Pattern match your way to glory!! 👑

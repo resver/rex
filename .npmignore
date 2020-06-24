@@ -1,0 +1,16 @@
+lib/bs
+*.mlast
+*.mliast
+
+.vscode
+.merlin
+.bsb.lock
+
+node_modules
+
+*.bs.js
+
+coverage
+
+docs
+examples

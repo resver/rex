@@ -1,6 +1,6 @@
 {
-  "name": "@resver/rex",
-  "version": "0.1.0",
+  "name": "resver-rex",
+  "version": "0.0.1",
   "scripts": {
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
@@ -10,7 +10,7 @@
   "keywords": [
     "BuckleScript"
   ],
-  "author": "",
+  "author": "damaera",
   "license": "MIT",
   "devDependencies": {
     "@glennsl/bs-jest": "^0.5.1",

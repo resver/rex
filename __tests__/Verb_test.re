@@ -26,7 +26,7 @@ describe("Method.make", () => {
          Head,
          Connect,
          Trace,
-         Unknown("hello"),
+         Get,
        ])
   )
 });
