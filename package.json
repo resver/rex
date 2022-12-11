@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "mime-types": "^2.1.27",
-    "qs": "^6.9.4",
+    "qs": "^6.9.7",
     "uWebSockets.js": "uNetworking/uWebSockets.js#v18.1.0"
   }
 }
